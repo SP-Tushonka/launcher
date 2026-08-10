@@ -246,6 +246,26 @@ public class ConfigHelper
         }
     }
 
+    public bool AddLinuxProtonPath(string linuxProtonPath)
+    {
+        lock (_lock)
+        {
+            _logger.LogDebug("AddLinuxProtonPath: {ProtonPath}", linuxProtonPath);
+
+            if (!_settings!.LinuxSettings.ProtonPaths.Contains(linuxProtonPath))
+            {
+                _settings.LinuxSettings.ProtonPaths.Add(linuxProtonPath);
+                SaveConfig();
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public void SetLinuxGameMode(bool linuxGameMode)
     {
         lock (_lock)

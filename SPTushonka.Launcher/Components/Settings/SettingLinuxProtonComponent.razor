@@ -1,17 +1,24 @@
 @inject LocaleHelper LocaleHelper
 @inject ConfigHelper ConfigHelper
 @inject LinuxHelper LinuxHelper
+@inject ISnackbar Snackbar
 
 <MudContainer Class="pa-0">
-    <a class="d-flex justify-center align-center @(Disabled ? "" : "cursor-pointer setting-on-hover") py-2 px-5">
-        <MudText Class="no-select">@OptionName</MudText>
-        <MudSpacer/>
-        <MudSelect T="string" Value="_selectedOption" Disabled="@Disabled" Clearable="false" ValueChanged="v => OnValueChanged(v)">
-            @foreach (var item in Options)
-            {
-                <MudSelectItem Value="@item">@item</MudSelectItem>
-            }
-        </MudSelect>
+    <MudLink Color="Color.Default" Underline="Underline.None" Disabled="Disabled" Class="@(GetLinkClasses())">
+            <MudSelect T="string" Label="@(LocaleHelper.Get("linux_proton_version"))"
+                    Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true"
+                    Value="_selectedOption" ValueChanged="v => OnValueChanged(v)">
+                @foreach (var item in Options)
+                {
+                    <MudSelectItem Value="@item">@item</MudSelectItem>
+                }
+            </MudSelect>
+    </MudLink>
+    <a class="d-flex justify-center align-center py-2 px-5">
+        <MudButton Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Add" 
+                OnClick="AddProtonPath" Color="Color.Primary" Size="Size.Small">
+            @LocaleHelper.Get("linux_add_proton_path")
+        </MudButton>
     </a>
 </MudContainer>
 @if (AddDiv)
@@ -24,7 +31,6 @@
     protected override async Task OnInitializedAsync()
     {
         _selectedOption = ConfigHelper.GetConfig().LinuxSettings.ProtonVersion;
-        OptionName = LocaleHelper.Get("linux_proton_version");
         Options = await LinuxHelper.GetProtonVersions();
         await base.OnInitializedAsync();
     }
@@ -34,9 +40,60 @@
     [Parameter]
     public bool AddDiv { get; set; }
 
+    private string NewValue { get; set; } = "";
+
     private List<string> Options { get; set; } = [];
-    private string OptionName { get; set; } = "";
+
     private string _selectedOption = "";
+
+    private async Task AddProtonPath()
+    {
+        var folder = await Launcher.App.MainWindow.ShowOpenFolderAsync(title: "Choose a Folder", defaultPath: FilePickerHelper.StartDirectory(NewValue));
+
+        // no folder was selected
+        if (!folder.Any())
+        {
+            return;
+        }
+
+        NewValue = folder.FirstOrDefault()!;
+        
+        if (Save())
+        {
+            Options = await LinuxHelper.GetProtonVersions();
+        }
+        
+        StateHasChanged();
+    }
+
+    private string GetLinkClasses()
+    {
+        var classes = new CssBuilder()
+            .AddClass("d-flex")
+            .AddClass("justify-center")
+            .AddClass("align-center")
+            .AddClass("py-2")
+            .AddClass("pl-5");
+
+        if (!Disabled)
+        {
+            classes.AddClass("cursor-pointer").AddClass("setting-on-hover");
+        }
+
+        return classes.Build();
+    }
+    
+    private bool Save()
+    {
+        if (!ConfigHelper.AddLinuxProtonPath(NewValue))
+        {
+            Snackbar.Add(LocaleHelper.Get("setting_save_path_error_2"), Severity.Warning);
+            return false;
+        }
+
+        Snackbar.Add(LocaleHelper.Get("setting_save_path_success"), Severity.Success);
+        return true;
+    }
 
     private void OnValueChanged(string value)
     {
