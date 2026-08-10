@@ -5,8 +5,8 @@
 
 <MudContainer Class="pa-0">
     <MudLink Color="Color.Default" Underline="Underline.None" Disabled="Disabled" Class="@(GetLinkClasses())">
-            <MudSelect T="string" Label="@(LocaleHelper.Get("linux_proton_version"))"
-                    Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true"
+            <MudSelect T="string" Style="margin-right: 20px;" Label="@(LocaleHelper.Get("linux_proton_version"))"
+                    Variant="Variant.Outlined" Margin="Margin.Dense"
                     Value="_selectedOption" ValueChanged="v => OnValueChanged(v)">
                 @foreach (var item in Options)
                 {
