@@ -1,0 +1,4 @@
+<Solution>
+    <Project Path="SPTushonka.Core/SPTushonka.Core.csproj" />
+    <Project Path="SPTushonka.Launcher/SPTushonka.Launcher.csproj" />
+</Solution>

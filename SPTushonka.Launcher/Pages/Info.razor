@@ -1,0 +1,25 @@
+﻿@page "/Info"
+
+@inject LocaleHelper LocaleHelper
+
+<MudContainer Class="px-4 my-2" MaxWidth="MaxWidth.Large">
+    <MudGrid>
+        <InfoCardComponent Name="Forge" Description="@(LocaleHelper.Get("info_forge_desc"))" Link="https://sp-mod.com/"/>
+        <InfoCardComponent Name="SPT WIKI" Description="@(LocaleHelper.Get("info_spt_desc"))" Link="https://wiki.sp-tushonka.com/en/home"/>
+        <InfoCardComponent Name="Github" Description="@(LocaleHelper.Get("info_github_desc"))" Link="https://github.com/SP-Tushonka"/>
+        <InfoCardComponent Name="Discord" Description="@(LocaleHelper.Get("info_discord_desc"))" Link="https://discord.sp-tushonka.com"/>
+        <InfoCardComponent Name="Escape From Tarkov Wiki" Description="@(LocaleHelper.Get("info_wiki_desc"))" Link="https://escapefromtarkov.fandom.com/wiki/Escape_from_Tarkov_Wiki"/>
+        <InfoCardComponent Name="Escape From Tarkov Wiki Changelog" Description="@(LocaleHelper.Get("info_changelog_desc"))" Link="https://escapefromtarkov.fandom.com/wiki/Changelog"/>
+        <InfoCardComponent Name="SPT Launcher Github" Description="@(LocaleHelper.Get("info_translations"))" Link="https://github.com/SP-Tushonka/launcher/issues"/>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    // https://sp-mod.com/
+    // https://github.com/SP-Tushonka
+    // https://discord.sp-tushonka.com
+    // https://escapefromtarkov.fandom.com/wiki/Escape_from_Tarkov_Wiki
+    // https://escapefromtarkov.fandom.com/wiki/Changelog
+    // https://github.com/SP-Tushonka/launcher/issues
+    // https://wiki.sp-tushonka.com/en/home
+}

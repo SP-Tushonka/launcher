@@ -2,12 +2,14 @@
   <Import Project="../Build.props" />
 
   <PropertyGroup>
-    <Authors>Single Player Tarkov</Authors>
-    <Description>Single Player Tarkov Launcher project.</Description>
-    <Copyright>Copyright (c) Single Player Tarkov 2026</Copyright>
+    <PackageId>SPTushonka.Launcher</PackageId>
+    <RootNamespace>SPTarkov.Launcher</RootNamespace>
+    <Authors>Single Player Tushonka</Authors>
+    <Description>Single Player Tushonka Launcher project.</Description>
+    <Copyright>Copyright (c) Single Player Tushonka 2026</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageProjectUrl>https://sp-tarkov.com</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/sp-tarkov/launcher</RepositoryUrl>
+    <PackageProjectUrl>https://sp-mod.com</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SP-Tushonka/launcher</RepositoryUrl>
     <LangVersion>latestmajor</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <OutputType>WinExe</OutputType>
@@ -35,10 +37,10 @@
   </Target>
 
   <ItemGroup>
-    <ProjectReference Include="../SPTarkov.Core/SPTarkov.Core.csproj" />
+    <ProjectReference Include="../SPTushonka.Core/SPTushonka.Core.csproj" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.0" />
     <EmbeddedResource Include="wwwroot/**" />
-    <SptData Include="$(ProjectDir)../SPTarkov.Core/SPT_Data/**/*.*" />
+    <SptData Include="$(ProjectDir)../SPTushonka.Core/SPT_Data/**/*.*" />
   </ItemGroup>
 
   <ItemGroup>

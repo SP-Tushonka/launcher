@@ -1,12 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Build.props" />
   <PropertyGroup>
-    <Authors>Single Player Tarkov</Authors>
-    <Description>Core library for the Single Player Tarkov Launcher project.</Description>
-    <Copyright>Copyright (c) Single Player Tarkov 2026</Copyright>
+    <PackageId>SPTushonka.Core</PackageId>
+    <AssemblyName>SPTarkov.Core</AssemblyName>
+    <RootNamespace>SPTarkov.Core</RootNamespace>
+    <Authors>Single Player Tushonka</Authors>
+    <Description>Core library for the Single Player Tushonka Launcher project.</Description>
+    <Copyright>Copyright (c) Single Player Tushonka 2026</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageProjectUrl>https://sp-tarkov.com</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/sp-tarkov/launcher</RepositoryUrl>
+    <PackageProjectUrl>https://sp-mod.com</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SP-Tushonka/launcher</RepositoryUrl>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <OutputType>Library</OutputType>
