@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using SPTarkov.Core.Configuration;
+using SPTarkov.Core.Forge;
 using SPTarkov.Core.SPT;
 
 namespace SPTarkov.Core.Helpers;
@@ -14,6 +15,15 @@ public class StateHelper(ILogger<StateHelper> logger)
     public List<ModPage> ModPages = [];
     public MiniProfile? SelectedProfile;
     public Server? SelectedServer;
+
+    public int CurrentPagination = 1;
+    public string CurrentSearch = "";
+    public string CurrentSort = "-downloads";
+    public string CurrentFilter = "Include";
+    public string CurrentAi = "Exclude";
+    public string CurrentCategory = "all-cat";
+
+    public List<ForgeCategory>? ListOfCategoriesAvailable;
 
     public bool AllowNavigation { get; set; } = true;
     public bool AllowServerPage { get; set; }
