@@ -75,3 +75,9 @@
     position: relative;
     top: -1px;
 }
+
+/* Long select item lists shouldn't overflow the entire window. */
+.limited-height-select .mud-list {
+        max-height: 192px; 
+        overflow-y: auto;
+}

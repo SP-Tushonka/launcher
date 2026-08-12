@@ -3,14 +3,6 @@
 @inject ConfigHelper ConfigHelper
 @inject LinuxHelper LinuxHelper
 
-@* Prevents very long select item lists to block the entire window *@
-<style>
-    .limited-height-select .mud-list {
-        max-height: 192px; 
-        overflow-y: auto;
-    }
-</style>
-
 <MudDialog Class="mud-background-gray border-2 border-solid mud-border-lines-default">
     <DialogContent>
         <MudContainer Class="py-4">
