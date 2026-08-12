@@ -3,10 +3,19 @@
 @inject LinuxHelper LinuxHelper
 @inject ISnackbar Snackbar
 
+@* Prevents very long select item lists to block the entire window *@
+<style>
+    .limited-height-select .mud-list {
+        max-height: 192px; 
+        overflow-y: auto;
+    }
+</style>
+
 <MudContainer Class="pa-0">
     <MudLink Color="Color.Default" Underline="Underline.None" Disabled="Disabled" Class="@(GetLinkClasses())">
-            <MudSelect T="string" Style="margin-right: 20px;" Label="@(LocaleHelper.Get("linux_proton_version"))"
-                    Variant="Variant.Outlined" Margin="Margin.Dense"
+            <MudSelect T="string" PopoverClass="limited-height-select" Margin="Margin.Dense"
+                    Label="@(LocaleHelper.Get("linux_proton_version"))"
+                    Style="margin-right: 20px;" Variant="Variant.Outlined"
                     Value="_selectedOption" ValueChanged="v => OnValueChanged(v)">
                 @foreach (var item in Options)
                 {
