@@ -17,6 +17,8 @@ public record LinuxSettings
     /// <summary>Proton build name, e.g. <c>GE-Proton10-24</c>.</summary>
     public string ProtonVersion { get; set; } = "GE-Proton11-1";
 
+    public List<string> ProtonPaths { get; set; } = new();
+
     public bool GameMode { get; set; }
 
     /// <summary>Default environment variables required to run the client.</summary>
