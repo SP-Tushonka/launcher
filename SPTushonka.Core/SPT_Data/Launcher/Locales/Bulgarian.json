@@ -28,7 +28,7 @@
   "info_translations": "Проблем с превода? Моля, отворете PR с корекции в GitHub",
   "profile_logout": "Излез от Профила",
   "profile_start_game": "Пусни Играта",
-  "profiles_disconnect": "Отвържи се от сървъра",
+  "profiles_disconnect": "Излез от сървъра",
   "profiles_create": "Създай нов профил",
   "profiles_login": "Влез с данни",
   "profiles_empty_title": "Този сървър няма публични профили за избор.",
