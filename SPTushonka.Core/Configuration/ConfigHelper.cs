@@ -49,7 +49,21 @@ public class ConfigHelper
                 SaveDefaults();
             }
 
-            _settings = JsonSerializer.Deserialize<LauncherSettings>(File.ReadAllText(Paths.LauncherSettingsPath));
+            try
+            {
+                _settings = JsonSerializer.Deserialize<LauncherSettings>(File.ReadAllText(Paths.LauncherSettingsPath));
+            }
+            catch (Exception ex) when (ex is JsonException or NotSupportedException)
+            {
+                _logger.LogError(ex, "Settings file could not be parsed, falling back to defaults.");
+                _settings = null;
+            }
+
+            if (_settings is null)
+            {
+                SaveDefaults();
+                _settings = new LauncherSettings();
+            }
 
             // Settings files written by earlier builds (pushed out to BE) persisted the built-in server.
             // GetServers rebuilds it from code, so drop the stale copy to avoid showing it twice.
