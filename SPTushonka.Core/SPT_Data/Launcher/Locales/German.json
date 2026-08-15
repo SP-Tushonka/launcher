@@ -232,6 +232,8 @@
   "setting_section_troubleshooting": "Fehlerbehebung",
   "linux_add_confirm": "Bestätigen?",
   "game_helper_error_7": "Verbindung zum Server wurde abgelehnt/unterbrochen",
-  "game_helper_error_8": "Unbekannter Fehler aufgetreten, bitte melde ihn bei SPT"
+  "game_helper_error_8": "Unbekannter Fehler aufgetreten, bitte melde ihn bei SPT",
+  "profile_page_task_4": "Acquiring Bundles",
+  "profile_page_task_4_fail": "Failed to acquire bundles",
+  "game_helper_error_9": "Bundle acquisition failed"
 }
-

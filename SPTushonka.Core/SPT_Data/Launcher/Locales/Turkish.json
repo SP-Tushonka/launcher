@@ -232,5 +232,8 @@
   "setting_section_troubleshooting": "Sorun Giderme",
   "linux_add_confirm": "Confirm?",
   "game_helper_error_7": "Connection was Refused/Lost to Server",
-  "game_helper_error_8": "Unknown error occured, please report to SPT"
+  "game_helper_error_8": "Unknown error occured, please report to SPT",
+  "profile_page_task_4": "Acquiring Bundles",
+  "profile_page_task_4_fail": "Failed to acquire bundles",
+  "game_helper_error_9": "Bundle acquisition failed"
 }

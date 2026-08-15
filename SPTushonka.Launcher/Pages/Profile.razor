@@ -41,12 +41,27 @@
     <MudContainer Class="pa-0 mb-4 d-flex flex-row gap-4 justify-center">
         <ProfileLevelComponent CurrentExp="SelectedMiniProfile.CurrentExp" CurrentLevel="SelectedMiniProfile.CurrentLevel" NeededExp="SelectedMiniProfile.NextLevel"/>
     </MudContainer>
+    @if (BundleProgressState is not null)
+    {
+        <MudContainer Class="pa-0 mb-4">
+            <MudPaper Elevation="2" Class="pa-3 mud-background-gray border-2 border-solid mud-border-lines-default card-container">
+                <MudText Typo="Typo.subtitle2" Class="mb-1">@(LocaleHelper.Get("profile_page_task_4")): @BundleProgressState.Current / @BundleProgressState.Total</MudText>
+                <MudProgressLinear Color="Color.Success" Value="@BundleProgressState.Percentage" Class="my-1"/>
+                @if (BundleProgressState.IsDownloading)
+                {
+                    <MudText Typo="Typo.caption">@BundleProgressState.BundleName</MudText>
+                    <MudText Typo="Typo.caption" Class="d-block">@BundleProgressState.DownloadSpeed | @BundleProgressState.FileSizeInfo</MudText>
+                }
+            </MudPaper>
+        </MudContainer>
+    }
 </MudContainer>
 
 @code {
     private bool CheckboxForWipe { get; set; }
     private MiniProfile SelectedMiniProfile { get; set; } = default!;
     private bool _buttonDisabled;
+    private BundleProgress? BundleProgressState { get; set; }
     private bool ShowWipeCheckbox => !SelectedMiniProfile.Wipe;
 
     // Deterministic per-profile tint for the name glyph, hashed from the username.
@@ -228,6 +243,26 @@
         {
             var message = GameHelper.ErrorMessage;
             Snackbar.Add($"{LocaleHelper.Get("profile_page_task_2_fail")}: {message}", Severity.Error);
+            return;
+        }
+
+        Snackbar.Add(LocaleHelper.Get("profile_page_task_4"));
+        BundleProgressState = new BundleProgress();
+
+        var bundleProgress = new Progress<BundleProgress>(state =>
+        {
+            BundleProgressState = state;
+            InvokeAsync(StateHasChanged);
+        });
+
+        var bundlesAcquired = await GameHelper.AcquireBundles(bundleProgress, CancellationToken.None);
+        BundleProgressState = null;
+        StateHasChanged();
+
+        if (!bundlesAcquired)
+        {
+            var message = GameHelper.ErrorMessage;
+            Snackbar.Add($"{LocaleHelper.Get("profile_page_task_4_fail")}: {message}", Severity.Error);
             return;
         }
 

@@ -54,6 +54,7 @@ public class Launcher
             .Services.AddSingleton<ConfigHelper>()
             .AddSingleton<GameHelper>()
             .AddSingleton<HttpHelper>()
+            .AddSingleton<BundleHelper>()
             .AddSingleton<StateHelper>()
             .AddSingleton<TitleHelper>()
             .AddSingleton<TrayHelper>()
