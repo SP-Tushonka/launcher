@@ -77,6 +77,64 @@ public class HttpHelper
         }
     }
 
+    /// <summary>
+    /// Streams a file straight to disk. Unlike <see cref="GameServerGet{T}"/> the body is not zlib-wrapped,
+    /// so it must not be run through SimpleZlib.
+    /// </summary>
+    /// <param name="url">Server-relative path to fetch</param>
+    /// <param name="destinationPath">Final path to write to</param>
+    /// <param name="onProgress">Called with (bytesWritten, totalBytes); totalBytes is -1 when unknown</param>
+    /// <param name="token">Cancels the download and removes the partial file</param>
+    public async Task DownloadFileAsync(string url, string destinationPath, Action<long, long>? onProgress, CancellationToken token)
+    {
+        _logger.LogDebug("Download: {Url}", url);
+
+        var directory = Path.GetDirectoryName(destinationPath);
+
+        if (!string.IsNullOrEmpty(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        // Write to a sibling temp file and move on success, so an interrupted download can never be
+        // mistaken for a complete bundle
+        var tempPath = destinationPath + ".part";
+
+        try
+        {
+            using var response = await _httpClient.GetAsync(BuildGameUrl(url), HttpCompletionOption.ResponseHeadersRead, token);
+            response.EnsureSuccessStatusCode();
+
+            var totalBytes = response.Content.Headers.ContentLength ?? -1;
+
+            await using (var source = await response.Content.ReadAsStreamAsync(token))
+            await using (var destination = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
+            {
+                var buffer = new byte[81920];
+                long written = 0;
+                int read;
+
+                while ((read = await source.ReadAsync(buffer, token)) > 0)
+                {
+                    await destination.WriteAsync(buffer.AsMemory(0, read), token);
+                    written += read;
+                    onProgress?.Invoke(written, totalBytes);
+                }
+            }
+
+            File.Move(tempPath, destinationPath, true);
+        }
+        catch
+        {
+            if (File.Exists(tempPath))
+            {
+                File.Delete(tempPath);
+            }
+
+            throw;
+        }
+    }
+
     public async Task<T?> GameServerPut<T>(string url, object request, CancellationToken token)
     {
         _logger.LogDebug("Put: {Url}", url);

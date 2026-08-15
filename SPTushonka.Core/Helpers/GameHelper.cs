@@ -5,6 +5,7 @@ using Microsoft.Win32;
 using SPTarkov.Core.Configuration;
 using SPTarkov.Core.Patching;
 using SPTarkov.Core.SPT;
+using SPTarkov.Core.SPT.Bundles;
 using SPTarkov.Core.SPT.Responses;
 using Version = SemanticVersioning.Version;
 
@@ -19,6 +20,7 @@ public class GameHelper
     private readonly FilePatcher _filePatcher;
     private readonly LocaleHelper _localeHelper;
     private readonly LinuxHelper _linuxHelper;
+    private readonly BundleHelper _bundleHelper;
 
     public string? ErrorMessage;
 
@@ -34,9 +36,11 @@ public class GameHelper
         FilePatcher filePatcher,
         HttpHelper httpHelper,
         LocaleHelper localeHelper,
-        LinuxHelper linuxHelper
+        LinuxHelper linuxHelper,
+        BundleHelper bundleHelper
     )
     {
+        _bundleHelper = bundleHelper;
         _stateHelper = stateHelper;
         _logger = logger;
         _configHelper = configHelper;
@@ -77,6 +81,20 @@ public class GameHelper
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Fetches and verifies mod bundles so the client finds them already in place
+    /// </summary>
+    public async Task<bool> AcquireBundles(IProgress<BundleProgress>? progress, CancellationToken token)
+    {
+        if (await _bundleHelper.AcquireBundlesAsync(progress, token))
+        {
+            return true;
+        }
+
+        ErrorMessage = _bundleHelper.ErrorMessage ?? _localeHelper.Get("game_helper_error_9");
+        return false;
     }
 
     public bool LaunchGame()

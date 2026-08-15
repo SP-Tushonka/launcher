@@ -30,4 +30,14 @@ public class Paths
     public static readonly string LogsFolder = Path.Join(_runtimeRoot, "user", "logs");
     public static readonly string LauncherLog = Path.Join(_runtimeRoot, "user", "logs", "Launcher.log");
     public static readonly string ProfilesFolder = Path.Join(_runtimeRoot, "user", "profiles");
+    
+    public static string BundleCacheFolder(string gamePath)
+    {
+        return Path.Join(gamePath, "SPT_Runtime", "user", "cache", "bundles");
+    }
+
+    public static string BundleCacheManifest(string gamePath)
+    {
+        return Path.Join(gamePath, "SPT_Runtime", "user", "cache", "bundleCache.json");
+    }
 }
