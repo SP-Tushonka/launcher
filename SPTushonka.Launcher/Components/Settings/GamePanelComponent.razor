@@ -4,6 +4,7 @@
 <SettingsSectionComponent Title="@(LocaleHelper.Get("setting_section_game"))">
     <SettingSwitchComponent Switch="@AutoConnectSwitch" OptionName="@(LocaleHelper.Get("setting_auto_connect"))" SwitchFunc="SetAutoConnect"/>
     <SettingSwitchComponent Switch="@ClearCacheOnLaunchSwitch" OptionName="@(LocaleHelper.Get("setting_option_clear_cache"))" SwitchFunc="SetClearCacheOnLaunch"/>
+    <SettingSwitchComponent Switch="@HideHeadlessProfiles" OptionName="@(LocaleHelper.Get("setting_hide_headless_profiles"))" SwitchFunc="SetHideHeadlessProfiles"/>
     <SettingGamePath/>
 </SettingsSectionComponent>
 
@@ -11,12 +12,14 @@
 {
     private bool AutoConnectSwitch { get; set; }
     private bool ClearCacheOnLaunchSwitch { get; set; }
+    private bool HideHeadlessProfiles { get; set; }
 
     protected override void OnInitialized()
     {
         var settings = ConfigHelper.GetConfig();
         AutoConnectSwitch = settings.AutoConnectLastProfile;
         ClearCacheOnLaunchSwitch = settings.ClearCacheOnLaunch;
+        HideHeadlessProfiles = settings.HideHeadlessProfiles;
 
         base.OnInitialized();
     }
@@ -33,6 +36,14 @@
     {
         ClearCacheOnLaunchSwitch = !ClearCacheOnLaunchSwitch;
         ConfigHelper.SetClearCacheOnLaunch(ClearCacheOnLaunchSwitch);
+
+        return Task.CompletedTask;
+    }
+
+    private Task SetHideHeadlessProfiles()
+    {
+        HideHeadlessProfiles = !HideHeadlessProfiles;
+        ConfigHelper.SetHideHeadlessProfiles(HideHeadlessProfiles);
 
         return Task.CompletedTask;
     }

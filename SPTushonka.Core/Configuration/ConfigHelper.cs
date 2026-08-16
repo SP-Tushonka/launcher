@@ -370,4 +370,14 @@ public class ConfigHelper
             SaveConfig();
         }
     }
+
+    public void SetHideHeadlessProfiles(bool hide)
+    {
+        lock (_lock)
+        {
+            _logger.LogDebug("HideHeadlessProfiles: {Hide}", hide ? "true" : "false");
+            _settings!.HideHeadlessProfiles = hide;
+            SaveConfig();
+        }
+    }
 }

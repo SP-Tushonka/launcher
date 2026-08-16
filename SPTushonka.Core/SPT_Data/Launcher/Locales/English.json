@@ -235,5 +235,6 @@
   "game_helper_error_8": "Unknown error occured, please report to SPT",
   "profile_page_task_4": "Acquiring Bundles",
   "profile_page_task_4_fail": "Failed to acquire bundles",
-  "game_helper_error_9": "Bundle acquisition failed"
+  "game_helper_error_9": "Bundle acquisition failed",
+  "setting_hide_headless_profiles": "Hide Headless Profiles"
 }

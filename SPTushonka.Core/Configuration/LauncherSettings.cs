@@ -28,6 +28,8 @@ public record LauncherSettings
 
     public bool AutoConnectLastProfile { get; set; }
 
+    public bool HideHeadlessProfiles { get; set; }
+
     /// <summary>The last server/profile the user launched with.</summary>
     public PreferredProfile? PreferredProfile { get; set; }
 

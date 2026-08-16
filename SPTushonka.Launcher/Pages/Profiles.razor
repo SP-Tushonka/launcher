@@ -21,6 +21,8 @@
     <MudGrid>
         @foreach (var profile in ProfilesList)
         {
+            if (ConfigHelper.GetConfig().HideHeadlessProfiles && profile.Nickname.ToLower().StartsWith("headless_")) { continue; }
+
             <ProfileCardComponent MiniProfile="@profile" @bind-ProfileList="ProfilesList" HideSideImage="true"/>
         }
 
