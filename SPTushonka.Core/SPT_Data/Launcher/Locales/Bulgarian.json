@@ -232,5 +232,8 @@
   "setting_section_troubleshooting": "Отстраняване на Неизправности",
   "linux_add_confirm": "Потвърди",
   "game_helper_error_7": "Връзката към сървъра беше отказана/загубена",
-  "game_helper_error_8": "Случи се непозната грешка, моля докладвайте до SPT"
+  "game_helper_error_8": "Случи се непозната грешка, моля докладвайте до SPT",
+  "profile_page_task_4": "Изтегляне на Пакети",
+  "profile_page_task_4_fail": "Проблем с изтеглянето на пакети",
+  "game_helper_error_9": "Проблем с изтеглянето на пакети"
 }
