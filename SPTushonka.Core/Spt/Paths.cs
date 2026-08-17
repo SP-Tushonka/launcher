@@ -36,8 +36,4 @@ public class Paths
         return Path.Join(gamePath, "SPT_Runtime", "user", "cache", "bundles");
     }
 
-    public static string BundleCacheManifest(string gamePath)
-    {
-        return Path.Join(gamePath, "SPT_Runtime", "user", "cache", "bundleCache.json");
-    }
 }

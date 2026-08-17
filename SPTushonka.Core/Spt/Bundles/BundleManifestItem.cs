@@ -13,5 +13,7 @@ public sealed record BundleManifestItem
 
     public long Size { get; set; }
 
+    public long ModifiedUtcTicks { get; set; }
+
     public List<string> Dependencies { get; set; } = [];
 }

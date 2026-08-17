@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO.Hashing;
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using SPTarkov.Core.Configuration;
 using SPTarkov.Core.SPT;
@@ -9,7 +8,7 @@ using SPTarkov.Core.SPT.Bundles;
 
 namespace SPTarkov.Core.Helpers;
 
-public class BundleHelper(ILogger<BundleHelper> logger, HttpHelper httpHelper, StateHelper stateHelper, ConfigHelper configHelper)
+public class BundleHelper(ILogger<BundleHelper> logger, HttpHelper httpHelper, ConfigHelper configHelper)
 {
     private const int MaxConcurrentDownloads = 8;
     private const int MaxAttemptsPerBundle = 3;
@@ -22,29 +21,24 @@ public class BundleHelper(ILogger<BundleHelper> logger, HttpHelper httpHelper, S
         get { return Paths.BundleCacheFolder(configHelper.GetGamePath()); }
     }
 
-    private string CacheManifest
+    private string RuntimeFolder
     {
-        get { return Paths.BundleCacheManifest(configHelper.GetGamePath()); }
+        get { return Path.Join(configHelper.GetGamePath(), "SPT_Runtime"); }
     }
 
-    public bool IsLocalServer
+    private string CachePathFor(BundleManifestItem bundle)
     {
-        get
-        {
-            var address = stateHelper.SelectedServer?.IpAddress ?? string.Empty;
-            return address.Contains("127.0.0.1") || address.Contains("localhost");
-        }
+        return Path.Join(CacheFolder, bundle.Crc.ToString("X8"), bundle.FileName);
+    }
+
+    private string ModPathFor(BundleManifestItem bundle)
+    {
+        return Path.Join(RuntimeFolder, bundle.ModPath, "bundles", bundle.FileName);
     }
 
     public async Task<bool> AcquireBundlesAsync(IProgress<BundleProgress>? progress, CancellationToken token)
     {
         ErrorMessage = null;
-
-        if (IsLocalServer)
-        {
-            logger.LogInformation("Local server, bundles are loaded in place and need no acquisition");
-            return true;
-        }
 
         List<BundleManifestItem>? manifest;
 
@@ -65,77 +59,44 @@ public class BundleHelper(ILogger<BundleHelper> logger, HttpHelper httpHelper, S
             return true;
         }
 
-        var cache = await LoadCacheAsync(token);
-        var current = new ConcurrentDictionary<string, BundleCacheEntry>();
+        var missing = manifest.Where(bundle => !IsAvailable(bundle)).ToList();
 
-        var stale = new List<BundleManifestItem>();
+        logger.LogInformation("{Have} bundles already present, {Missing} to download", manifest.Count - missing.Count, missing.Count);
 
-        foreach (var bundle in manifest)
-        {
-            var path = Path.Join(CacheFolder, bundle.FileName);
-
-            if (TryValidate(path, bundle, cache, out var entry))
-            {
-                current[bundle.FileName] = entry;
-                continue;
-            }
-
-            stale.Add(bundle);
-        }
-
-        logger.LogInformation("{Fresh} bundles cached, {Stale} to download", manifest.Count - stale.Count, stale.Count);
-
-        var acquired = await DownloadAsync(stale, manifest.Count - stale.Count, manifest.Count, current, progress, token);
-
-        await SaveCacheAsync(current, token);
-
-        return acquired;
+        return await DownloadAsync(missing, manifest.Count - missing.Count, manifest.Count, progress, token);
     }
 
-    private bool TryValidate(
-        string path,
-        BundleManifestItem bundle,
-        Dictionary<string, BundleCacheEntry> cache,
-        out BundleCacheEntry entry
-    )
+    private bool IsAvailable(BundleManifestItem bundle)
     {
-        entry = null!;
+        return IsAvailable(bundle, CachePathFor(bundle), ModPathFor(bundle));
+    }
 
-        if (!File.Exists(path))
+    public static bool IsAvailable(BundleManifestItem bundle, string cachePath, string modPath)
+    {
+        if (File.Exists(cachePath) && new FileInfo(cachePath).Length == bundle.Size)
         {
-            return false;
-        }
-
-        var info = new FileInfo(path);
-        var size = info.Length;
-        var modified = info.LastWriteTimeUtc.Ticks;
-
-        if (
-            cache.TryGetValue(bundle.FileName, out var cached)
-            && cached.Size == size
-            && cached.ModifiedUtcTicks == modified
-            && cached.Crc == bundle.Crc
-        )
-        {
-            entry = cached;
             return true;
         }
 
-        var crc = HashFile(path);
-
-        if (crc != bundle.Crc)
+        if (!File.Exists(modPath))
         {
             return false;
         }
 
-        entry = new BundleCacheEntry
-        {
-            Size = size,
-            ModifiedUtcTicks = modified,
-            Crc = crc,
-        };
+        var info = new FileInfo(modPath);
 
-        return true;
+        if (info.Length != bundle.Size)
+        {
+            return false;
+        }
+        
+        // Same size and write time means this is the same file the server hashed
+        if (info.LastWriteTimeUtc.Ticks == bundle.ModifiedUtcTicks)
+        {
+            return true;
+        }
+
+        return HashFile(modPath) == bundle.Crc;
     }
 
     private static uint HashFile(string path)
@@ -155,23 +116,24 @@ public class BundleHelper(ILogger<BundleHelper> logger, HttpHelper httpHelper, S
     }
 
     private async Task<bool> DownloadAsync(
-        List<BundleManifestItem> stale,
-        int alreadyFresh,
+        List<BundleManifestItem> missing,
+        int alreadyPresent,
         int total,
-        ConcurrentDictionary<string, BundleCacheEntry> current,
         IProgress<BundleProgress>? progress,
         CancellationToken token
     )
     {
-        if (stale.Count == 0)
+        if (missing.Count == 0)
         {
             progress?.Report(new BundleProgress { Current = total, Total = total });
             return true;
         }
 
-        var completed = alreadyFresh;
+        var completed = alreadyPresent;
         var downloadedBytes = 0L;
-        var totalBytes = stale.Sum(bundle => bundle.Size);
+
+        // Known up front from the manifest
+        var totalBytes = missing.Sum(bundle => bundle.Size);
 
         var failures = new ConcurrentBag<string>();
         var started = Stopwatch.StartNew();
@@ -180,17 +142,17 @@ public class BundleHelper(ILogger<BundleHelper> logger, HttpHelper httpHelper, S
         var lastReportBytes = 0L;
         var speed = 0d;
 
-        void Report(string bundleName, bool force)
+        void Report(string bundleName)
         {
             var nowMs = (long)started.Elapsed.TotalMilliseconds;
             var previous = Interlocked.Read(ref lastReportMs);
 
-            if (!force && nowMs - previous < ReportIntervalMs)
+            if (nowMs - previous < ReportIntervalMs)
             {
                 return;
             }
 
-            if (!force && Interlocked.CompareExchange(ref lastReportMs, nowMs, previous) != previous)
+            if (Interlocked.CompareExchange(ref lastReportMs, nowMs, previous) != previous)
             {
                 return;
             }
@@ -218,11 +180,11 @@ public class BundleHelper(ILogger<BundleHelper> logger, HttpHelper httpHelper, S
         }
 
         await Parallel.ForEachAsync(
-            stale,
+            missing,
             new ParallelOptions { MaxDegreeOfParallelism = MaxConcurrentDownloads, CancellationToken = token },
             async (bundle, ct) =>
             {
-                var destination = Path.Join(CacheFolder, bundle.FileName);
+                var destination = CachePathFor(bundle);
 
                 for (var attempt = 1; attempt <= MaxAttemptsPerBundle; attempt++)
                 {
@@ -240,19 +202,10 @@ public class BundleHelper(ILogger<BundleHelper> logger, HttpHelper httpHelper, S
                                 Interlocked.Add(ref downloadedBytes, written - lastReported);
                                 lastReported = written;
 
-                                Report(bundle.FileName, false);
+                                Report(bundle.FileName);
                             },
                             ct
                         );
-
-                        var info = new FileInfo(destination);
-
-                        current[bundle.FileName] = new BundleCacheEntry
-                        {
-                            Size = info.Length,
-                            ModifiedUtcTicks = info.LastWriteTimeUtc.Ticks,
-                            Crc = bundle.Crc,
-                        };
 
                         Interlocked.Increment(ref completed);
                         return;
@@ -294,45 +247,5 @@ public class BundleHelper(ILogger<BundleHelper> logger, HttpHelper httpHelper, S
         );
 
         return true;
-    }
-
-    private async Task<Dictionary<string, BundleCacheEntry>> LoadCacheAsync(CancellationToken token)
-    {
-        if (!File.Exists(CacheManifest))
-        {
-            return [];
-        }
-
-        try
-        {
-            await using var stream = File.OpenRead(CacheManifest);
-            return await JsonSerializer.DeserializeAsync<Dictionary<string, BundleCacheEntry>>(stream, cancellationToken: token) ?? [];
-        }
-        catch (JsonException ex)
-        {
-            logger.LogWarning(ex, "Bundle cache unreadable, rebuilding");
-            return [];
-        }
-    }
-
-    /// <summary>Writes only the bundles seen this run, so entries for removed mods drop out.</summary>
-    private async Task SaveCacheAsync(ConcurrentDictionary<string, BundleCacheEntry> entries, CancellationToken token)
-    {
-        try
-        {
-            var directory = Path.GetDirectoryName(CacheManifest);
-
-            if (!string.IsNullOrEmpty(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            await using var stream = File.Create(CacheManifest);
-            await JsonSerializer.SerializeAsync(stream, entries, cancellationToken: token);
-        }
-        catch (Exception ex)
-        {
-            logger.LogWarning(ex, "Could not write the bundle cache");
-        }
     }
 }
