@@ -66,23 +66,6 @@ public class GameHelper
 
     public async Task<bool> PatchGame()
     {
-        if (OperatingSystem.IsLinux())
-        {
-            var dosdevicesPath = Path.Join(_configHelper.GetConfig().LinuxSettings.PrefixPath, "dosdevices");
-            if (Directory.Exists(dosdevicesPath))
-            {
-                Directory.Delete(dosdevicesPath, true);
-
-                // We’re waiting for the OS to release all the locks and for the folder to disappear completely.
-                var attempts = 0;
-                while (Directory.Exists(dosdevicesPath) && attempts < 50)
-                {
-                    await Task.Delay(100);
-                    attempts++;
-                }
-            }
-        }
-
         try
         {
             await foreach (var _ in PatchFiles())
