@@ -78,21 +78,32 @@ public class FilePatcher(ILogger<FilePatcher> logger)
 
     private void RestoreRecurse(DirectoryInfo basedir)
     {
-        // We skip symbolic links and junction points to avoid going beyond the game’s catalog limits.
-        if ((basedir.Attributes & FileAttributes.ReparsePoint) != 0)
+        if (OperatingSystem.IsLinux())
         {
-            return;
+            // We skip symbolic links and junction points to avoid going beyond the game’s catalog limits.
+            if ((basedir.Attributes & FileAttributes.ReparsePoint) != 0)
+            {
+                return;
+            }
+
+            var options = new EnumerationOptions
+            {
+                RecurseSubdirectories = false
+            };
+
+            // scan subdirectories without reparse points
+            foreach (var dir in basedir.EnumerateDirectories("*", options))
+            {
+                RestoreRecurse(dir);
+            }
         }
-
-        var options = new EnumerationOptions
+        else
         {
-            RecurseSubdirectories = false
-        };
-
-        // scan subdirectories
-        foreach (var dir in basedir.EnumerateDirectories("*", options))
-        {
-            RestoreRecurse(dir);
+            // scan subdirectories
+            foreach (var dir in basedir.EnumerateDirectories())
+            {
+                RestoreRecurse(dir);
+            }
         }
 
         // scan files
