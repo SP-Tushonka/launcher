@@ -20,7 +20,7 @@ public record LauncherSettings
 
     public bool MinimizeOnLaunch { get; set; } = true;
 
-    public bool CloseOnGameStart { get; set; }
+    public bool CloseOnGameStart { get; set; } = false;
 
     public bool AlwaysTop { get; set; }
 
