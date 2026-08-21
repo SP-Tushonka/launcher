@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
@@ -33,6 +33,33 @@ public class Launcher
 
     // Photino re-asserts the window while cancelling a close so wait before hiding to tray.
     private const int HideToTrayDelayMs = 100;
+
+    private static readonly string WindowsBrowserArgs = string.Join(
+        ' ',
+        "--renderer-process-limit=1",
+        "--process-per-site",
+        "--disable-site-isolation-trials",
+        "--enable-low-end-device-mode",
+        "--disable-background-networking",
+        "--disable-in-process-stack-traces",
+        "--disable-features="
+            + string.Join(
+                ',',
+                "msWebOOUI",
+                "msPdfOOUI",
+                "msSmartScreenProtection",
+                "Translate",
+                "OptimizationHints",
+                "MediaRouter",
+                "DialMediaRouteProvider",
+                "AutofillServerCommunication",
+                "StorageServiceOutOfProcess",
+                "BackForwardCache",
+                "EnablePerfettoSystemTracing",
+                "IsolateOrigins",
+                "site-per-process"
+            )
+    );
 
     [STAThread]
     private static void Main(string[] args)
@@ -166,7 +193,7 @@ public class Launcher
         // This is not needed and will break on linux
         if (OperatingSystem.IsWindows())
         {
-            App.MainWindow.BrowserControlInitParameters = "--kiosk";
+            App.MainWindow.BrowserControlInitParameters = $"--kiosk {WindowsBrowserArgs}";
         }
         App.MainWindow.ContextMenuEnabled = false;
 #else
