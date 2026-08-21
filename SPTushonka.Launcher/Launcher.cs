@@ -256,6 +256,12 @@ public class Launcher
         });
     }
 
+    public static void RequestExit()
+    {
+        _exitRequested = true;
+        App.MainWindow.Close();
+    }
+
     // Brings the window back into focus.
     private static void SurfaceMainWindow()
     {
@@ -272,8 +278,7 @@ public class Launcher
 
     private static void ExitFromTray()
     {
-        _exitRequested = true;
-        App.MainWindow.Close();
+        RequestExit();
     }
 
     private static string ExtractTrayIcon()

@@ -36,6 +36,8 @@
   "profiles_connect_warning": "Lütfen önce bir Sunucuya bağlanın!",
   "setting_close": "Tepside Kapat",
   "setting_minimize": "Oyun Başlangıcında Küçült",
+  "setting_close_on_game_start": "Close Launcher On Game Start",
+  "profile_page_close_on_start_fail": "Game did not start in time, leaving the launcher open.",
   "setting_auto_connect": "Son profile otomatik bağlan",
   "auto_connect_connecting": "Son profilinize bağlanılıyor...",
   "auto_connect_failed": "Son sunucunuza otomatik olarak bağlanılamadı.",

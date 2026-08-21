@@ -36,6 +36,8 @@
   "profiles_connect_warning": "Please connect to a Server first!",
   "setting_close": "Close To Tray",
   "setting_minimize": "Minimize On Game Start",
+  "setting_close_on_game_start": "Close Launcher On Game Start",
+  "profile_page_close_on_start_fail": "Game did not start in time, leaving the launcher open.",
   "setting_auto_connect": "Auto-Connect To Last Profile",
   "setting_always_top": "Always On Top",
   "tray_show": "Show SPT Launcher",

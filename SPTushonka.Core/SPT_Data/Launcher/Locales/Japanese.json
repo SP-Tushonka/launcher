@@ -36,6 +36,8 @@
   "profiles_connect_warning": "先にサーバーに接続してください！",
   "setting_close": "トレイに最小化",
   "setting_minimize": "ゲーム起動時に最小化",
+  "setting_close_on_game_start": "Close Launcher On Game Start",
+  "profile_page_close_on_start_fail": "Game did not start in time, leaving the launcher open.",
   "setting_auto_connect": "前回のプロファイルに自動接続",
   "auto_connect_connecting": "前回のプロファイルに接続しています...",
   "auto_connect_failed": "前回のサーバーに自動接続できませんでした。",

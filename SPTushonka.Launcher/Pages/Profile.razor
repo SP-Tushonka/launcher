@@ -61,6 +61,9 @@
     private bool CheckboxForWipe { get; set; }
     private MiniProfile SelectedMiniProfile { get; set; } = default!;
     private bool _buttonDisabled;
+    private bool _exitingAfterStart;
+
+    private static readonly TimeSpan GameStartTimeout = TimeSpan.FromMinutes(2);
     private BundleProgress? BundleProgressState { get; set; }
     private bool ShowWipeCheckbox => !SelectedMiniProfile.Wipe;
 
@@ -112,6 +115,12 @@
         StateHelper.SetAllowNavigation(false);
 
         await StartGame();
+
+        if (_exitingAfterStart)
+        {
+            return;
+        }
+
         await RefreshProfiles();
 
         CheckboxForWipe = false;
@@ -279,6 +288,18 @@
         if (ConfigHelper.GetConfig().AutoConnectLastProfile && StateHelper.SelectedServer is not null && StateHelper.SelectedProfile is not null)
         {
             ConfigHelper.SetPreferredProfile(StateHelper.SelectedServer.ServerId, StateHelper.SelectedProfile.ProfileId);
+        }
+
+        if (ConfigHelper.GetConfig().CloseOnGameStart)
+        {
+            if (await GameHelper.WaitForGameRunning(GameStartTimeout, CancellationToken.None))
+            {
+                _exitingAfterStart = true;
+                Launcher.RequestExit();
+                return;
+            }
+
+            Snackbar.Add(LocaleHelper.Get("profile_page_close_on_start_fail"), Severity.Warning);
         }
 
         if (ConfigHelper.GetConfig().MinimizeOnLaunch)

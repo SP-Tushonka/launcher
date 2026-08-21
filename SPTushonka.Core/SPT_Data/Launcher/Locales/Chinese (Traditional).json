@@ -36,6 +36,8 @@
   "profiles_connect_warning": "請先連線到伺服器！",
   "setting_close": "關閉到托盤",
   "setting_minimize": "遊戲開始時最小化",
+  "setting_close_on_game_start": "Close Launcher On Game Start",
+  "profile_page_close_on_start_fail": "Game did not start in time, leaving the launcher open.",
   "setting_auto_connect": "自動連線到上次的個人檔案",
   "auto_connect_connecting": "正在連線到您上次的個人檔案...",
   "auto_connect_failed": "無法自動連線到您上次的伺服器。",

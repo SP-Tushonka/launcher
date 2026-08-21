@@ -36,6 +36,8 @@
   "profiles_connect_warning": "Connettiti prima a un Server!",
   "setting_close": "Chiudi nella barra delle applicazioni",
   "setting_minimize": "Minimizza all'avvio del gioco",
+  "setting_close_on_game_start": "Close Launcher On Game Start",
+  "profile_page_close_on_start_fail": "Game did not start in time, leaving the launcher open.",
   "setting_auto_connect": "Connetti automaticamente all'ultimo profilo",
   "auto_connect_connecting": "Connessione al tuo ultimo profilo...",
   "auto_connect_failed": "Impossibile connettersi automaticamente al tuo ultimo server.",

@@ -36,6 +36,8 @@
   "profiles_connect_warning": "Пожалуйста, сначала подключитесь к серверу!",
   "setting_close": "Свернуть в трей",
   "setting_minimize": "Свернуть при запуске игры",
+  "setting_close_on_game_start": "Close Launcher On Game Start",
+  "profile_page_close_on_start_fail": "Game did not start in time, leaving the launcher open.",
   "setting_auto_connect": "Автоподключение к последнему профилю",
   "auto_connect_connecting": "Подключение к вашему последнему профилю...",
   "auto_connect_failed": "Не удалось автоматически подключиться к вашему последнему серверу.",

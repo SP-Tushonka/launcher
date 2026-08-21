@@ -190,6 +190,22 @@ public class ConfigHelper
         }
     }
 
+    public void SetCloseOnGameStart(bool closeOnGameStart)
+    {
+        lock (_lock)
+        {
+            _logger.LogDebug("SetCloseOnGameStart: {CloseOnGameStart}", closeOnGameStart);
+            _settings!.CloseOnGameStart = closeOnGameStart;
+
+            if (closeOnGameStart)
+            {
+                _settings.CloseToTray = false;
+            }
+
+            SaveConfig();
+        }
+    }
+
     public void SetAlwaysOnTop(bool alwaysOnTop)
     {
         lock (_lock)

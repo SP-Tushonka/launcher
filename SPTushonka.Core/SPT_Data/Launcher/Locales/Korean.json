@@ -36,6 +36,8 @@
   "profiles_connect_warning": "먼저 서버에 연결하세요!",
   "setting_close": "트레이로 최소화",
   "setting_minimize": "게임 시작 시 최소화",
+  "setting_close_on_game_start": "Close Launcher On Game Start",
+  "profile_page_close_on_start_fail": "Game did not start in time, leaving the launcher open.",
   "setting_auto_connect": "마지막 프로필에 자동 연결",
   "auto_connect_connecting": "마지막 프로필에 연결 중...",
   "auto_connect_failed": "마지막 서버에 자동으로 연결하지 못했습니다.",

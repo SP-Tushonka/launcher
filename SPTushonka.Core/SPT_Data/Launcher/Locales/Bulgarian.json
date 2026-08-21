@@ -36,6 +36,8 @@
   "profiles_connect_warning": "Моля, първо се свържете за Сървър!",
   "setting_close": "Скрий в Tray-а",
   "setting_minimize": "Скрий Когато Пуснеш Играта",
+  "setting_close_on_game_start": "Close Launcher On Game Start",
+  "profile_page_close_on_start_fail": "Game did not start in time, leaving the launcher open.",
   "setting_auto_connect": "Автоматично Свързване с Последния Използван Профил",
   "setting_always_top": "Дръж Прозореца Над Другите",
   "tray_show": "Покажи SPT Launcher",

@@ -359,10 +359,47 @@ public class GameHelper
         return true;
     }
 
+    private static string GameProcessName
+    {
+        get
+        {
+            return OperatingSystem.IsWindows() ? "EscapeFromTarkov" : "EscapeFromTarko";
+        }
+    }
+
+    public async Task<bool> WaitForGameRunning(TimeSpan timeout, CancellationToken token)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+
+        while (DateTime.UtcNow < deadline)
+        {
+            var processes = Process.GetProcessesByName(GameProcessName);
+
+            try
+            {
+                if (processes.Length > 0)
+                {
+                    return true;
+                }
+            }
+            finally
+            {
+                foreach (var process in processes)
+                {
+                    process.Dispose();
+                }
+            }
+
+            await Task.Delay(1000, token);
+        }
+
+        _logger.LogWarning("Game process did not appear within {Timeout}", timeout);
+        return false;
+    }
+
     public async Task<bool> MonitorGame()
     {
-        // On Linux the process name is cut off - We need to account for that
-        string processName = OperatingSystem.IsWindows() ? "EscapeFromTarkov" : "EscapeFromTarko";
+        string processName = GameProcessName;
 
         // Proton can take some time to launch the game, so we'll delay a bit
         await Task.Delay(12000);

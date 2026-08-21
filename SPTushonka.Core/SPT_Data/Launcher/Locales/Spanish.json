@@ -36,6 +36,8 @@
   "profiles_connect_warning": "¡Por favor, conéctese a un servidor primero!",
   "setting_close": "Cerrar a la bandeja",
   "setting_minimize": "Minimizar al iniciar el juego",
+  "setting_close_on_game_start": "Close Launcher On Game Start",
+  "profile_page_close_on_start_fail": "Game did not start in time, leaving the launcher open.",
   "setting_auto_connect": "Conectar automáticamente al último perfil",
   "auto_connect_connecting": "Conectando a tu último perfil...",
   "auto_connect_failed": "No se pudo conectar automáticamente a tu último servidor.",
