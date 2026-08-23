@@ -34,7 +34,7 @@
     {
         ProtonList = await LinuxHelper.GetProtonVersions();
         LinuxSettings = ConfigHelper.GetConfig().LinuxSettings;
-        LinuxSettings!.ProtonVersion = ProtonList.First();
+        LinuxSettings!.ProtonVersion = ProtonList.FirstOrDefault("");
 
         await base.OnParametersSetAsync();
     }
