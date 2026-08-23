@@ -370,4 +370,14 @@ public class ConfigHelper
             SaveConfig();
         }
     }
+
+    public bool IsPrefixPathValid(string path)
+    {
+        return !string.IsNullOrEmpty(path) && Directory.Exists(path) && File.Exists(Path.Combine(path, "system.reg"));
+    }
+
+    public bool IsUmuPathValid(string path)
+    {
+        return !string.IsNullOrEmpty(path) && File.Exists(path) && Path.GetFileName(path) == "umu-run";
+    }
 }

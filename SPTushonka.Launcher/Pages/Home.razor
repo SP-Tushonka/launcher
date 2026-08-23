@@ -50,11 +50,16 @@
         _serverList = ConfigHelper.GetServers();
         Launcher.App.MainWindow.SetMinimized(false);
 
-        if (OperatingSystem.IsLinux() && ConfigHelper.GetConfig().FirstRun)
-        {
-            await ShowLinuxFirstRunDialog();
-        }
+        var prefixPath = ConfigHelper.GetConfig().LinuxSettings.PrefixPath;
+        var umuPath = ConfigHelper.GetConfig().LinuxSettings.UmuPath;
+        var prefixValid = ConfigHelper.IsPrefixPathValid(prefixPath);
+        var umuValid = ConfigHelper.IsUmuPathValid(umuPath);
 
+        if (OperatingSystem.IsLinux() && (!prefixValid || !umuValid))
+        {
+            await ShowLinuxSettingsDialog();
+        }
+        
         await base.OnInitializedAsync();
         await TryAutoConnect();
     }
@@ -143,7 +148,7 @@
         }
     }
 
-    private async Task ShowLinuxFirstRunDialog()
+    private async Task ShowLinuxSettingsDialog()
     {
         var dialogOptions = new DialogOptions
         {

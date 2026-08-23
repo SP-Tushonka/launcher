@@ -224,7 +224,7 @@
   "linux_add_proton_required": "Proton Version is required",
   "linux_add_proton_placeholder": "Proton version to use",
   "linux_add_launch_settings_placeholder": "MANGOHUD=1",
-  "linux_add_success": "First run Linux settings confirmed",
+  "linux_add_success": "Linux settings confirmed",
   "setting_section_window": "Okno",
   "setting_section_interface": "Interfejs",
   "setting_section_game": "Gra",
