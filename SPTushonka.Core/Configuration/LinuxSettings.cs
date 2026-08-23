@@ -13,7 +13,7 @@ public record LinuxSettings
     /// </summary>
     public string LaunchSettings { get; set; } = "";
 
-    /// <summary>Proton build name, e.g. <c>GE-Proton10-24</c>.</summary>
+    /// <summary>Path to a Proton build, e.g. <c>/home/user/.steam/steam/compatibilitytools.d/GE-Proton11-5</c>.</summary>
     public string ProtonVersion { get; set; } = "";
 
     public List<string> ProtonPaths { get; set; } = new();

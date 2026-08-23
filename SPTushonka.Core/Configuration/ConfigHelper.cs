@@ -260,15 +260,15 @@ public class ConfigHelper
         }
     }
 
-    public bool AddLinuxProtonPath(string linuxProtonPath)
+    public bool AddLinuxProtonSearchPath(string linuxProtonSearchPath)
     {
         lock (_lock)
         {
-            _logger.LogDebug("AddLinuxProtonPath: {ProtonPath}", linuxProtonPath);
+            _logger.LogDebug("AddLinuxProtonSearchPath: {ProtonSearchPath}", linuxProtonSearchPath);
 
-            if (!_settings!.LinuxSettings.ProtonPaths.Contains(linuxProtonPath))
+            if (!_settings!.LinuxSettings.ProtonPaths.Contains(linuxProtonSearchPath))
             {
-                _settings.LinuxSettings.ProtonPaths.Add(linuxProtonPath);
+                _settings.LinuxSettings.ProtonPaths.Add(linuxProtonSearchPath);
                 SaveConfig();
             }
             else
@@ -379,5 +379,10 @@ public class ConfigHelper
     public bool IsUmuPathValid(string path)
     {
         return !string.IsNullOrEmpty(path) && File.Exists(path) && Path.GetFileName(path) == "umu-run";
+    }
+
+    public bool IsProtonVersionValid(string path)
+    {
+        return !string.IsNullOrEmpty(path) && Directory.Exists(path);
     }
 }

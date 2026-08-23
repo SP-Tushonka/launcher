@@ -28,7 +28,8 @@
     [CascadingParameter] private IMudDialogInstance? MudDialog { get; set; }
 
     private bool HasError => !ConfigHelper.IsPrefixPathValid(LinuxSettings!.PrefixPath) ||
-                            !ConfigHelper.IsUmuPathValid(LinuxSettings!.UmuPath);
+                            !ConfigHelper.IsUmuPathValid(LinuxSettings!.UmuPath) ||
+                            !ConfigHelper.IsProtonVersionValid(LinuxSettings!.ProtonVersion);
 
     protected override async Task OnParametersSetAsync()
     {

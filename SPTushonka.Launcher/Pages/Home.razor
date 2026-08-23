@@ -51,11 +51,15 @@
         Launcher.App.MainWindow.SetMinimized(false);
 
         var prefixPath = ConfigHelper.GetConfig().LinuxSettings.PrefixPath;
-        var umuPath = ConfigHelper.GetConfig().LinuxSettings.UmuPath;
         var prefixValid = ConfigHelper.IsPrefixPathValid(prefixPath);
+
+        var umuPath = ConfigHelper.GetConfig().LinuxSettings.UmuPath;
         var umuValid = ConfigHelper.IsUmuPathValid(umuPath);
 
-        if (OperatingSystem.IsLinux() && (!prefixValid || !umuValid))
+        var ProtonVersion = ConfigHelper.GetConfig().LinuxSettings.ProtonVersion;
+        var protonValid = ConfigHelper.IsProtonVersionValid(ProtonVersion);
+
+        if (OperatingSystem.IsLinux() && (!prefixValid || !umuValid || !protonValid))
         {
             await ShowLinuxSettingsDialog();
         }
