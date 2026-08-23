@@ -7,8 +7,8 @@
     <DialogContent>
         <MudContainer Class="py-4">
             <MudAlert Variant="Variant.Outlined" Severity="Severity.Warning">@(LocaleHelper.Get("linux_add_warning"))</MudAlert>
-            <SettingLinuxPrefixComponent @ref="prefixComponent" Disabled="false" AddDiv="false"/>
-            <SettingLinuxUmuComponent @ref="umuComponent" Disabled="false" AddDiv="false"/>
+            <SettingLinuxPrefixComponent Disabled="false" AddDiv="false"/>
+            <SettingLinuxUmuComponent Disabled="false" AddDiv="false"/>
             <SettingLinuxLaunchComponent Disabled="false" AddDiv="false"/>
             <SettingLinuxProtonComponent Disabled="false" AddDiv="false"/>
             <MudContainer Class="mt-3 d-flex justify-end pa-0 gap-2">
@@ -24,8 +24,6 @@
     private List<string> ProtonList { get; set; } = [];
 
     private LinuxSettings? LinuxSettings;
-    private SettingLinuxPrefixComponent? prefixComponent;
-    private SettingLinuxUmuComponent? umuComponent;
 
     [CascadingParameter] private IMudDialogInstance? MudDialog { get; set; }
 
