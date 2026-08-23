@@ -4,11 +4,14 @@
 
 <MudContainer Class="pa-0">
     <MudLink Color="Color.Default" Underline="Underline.None" Disabled="Disabled" Class="@(GetLinkClasses())">
-        <MudTextField @bind-Value="NewValue" Label="@(LocaleHelper.Get("linux_add_umu"))" Variant="Variant.Outlined" Immediate="true"
-                      Margin="Margin.Dense" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Folder"
-                      AdornmentColor="Color.Info" OnAdornmentClick="SetUmuPath" Error="@(!IsSaved || HasError)"/>
+        <MudTextField @bind-Value="NewValue" Label="@(LocaleHelper.Get("linux_add_umu"))"
+                    Variant="Variant.Outlined" Immediate="true"
+                    Margin="Margin.Dense" Adornment="Adornment.End"
+                    AdornmentIcon="@Icons.Material.Filled.Folder"
+                    AdornmentColor="Color.Info" OnAdornmentClick="SetUmuPath"
+                    Error="@(!IsSaved || HasError)" @onblur="OnFieldBlur"/>
         <MudIconButton Color="@(IsSaved ? Color.Default : Color.Success)" Icon="@Icons.Material.Filled.Save"
-                       Disabled="IsSaved" OnClick="Save"/>
+                    Disabled="IsSaved" OnClick="Save"/>
     </MudLink>
 </MudContainer>
 @if (AddDiv)
@@ -35,6 +38,11 @@
         NewValue = ConfigHelper.GetConfig().LinuxSettings.UmuPath;
 
         base.OnInitialized();
+    }
+
+    private void OnFieldBlur()
+    {
+        StateHasChanged();
     }
 
     private string GetLinkClasses()

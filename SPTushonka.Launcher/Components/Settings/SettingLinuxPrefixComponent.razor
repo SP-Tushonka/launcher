@@ -5,11 +5,13 @@
 <MudContainer Class="pa-0">
     <MudLink Color="Color.Default" Underline="Underline.None" Disabled="Disabled" Class="@(GetLinkClasses())">
         <MudTextField @bind-Value="NewValue" Label="@(LocaleHelper.Get("linux_wine_prefix"))"
-                      Variant="Variant.Outlined" Immediate="true" Margin="Margin.Dense" Adornment="Adornment.End"
-                      AdornmentIcon="@Icons.Material.Filled.Folder" AdornmentColor="Color.Info" OnAdornmentClick="SetPrefixPath"
-                      Error="@(!IsSaved || HasError)"/>
+                    Variant="Variant.Outlined" Immediate="true"
+                    Margin="Margin.Dense" Adornment="Adornment.End"
+                    AdornmentIcon="@Icons.Material.Filled.Folder"
+                    AdornmentColor="Color.Info" OnAdornmentClick="SetPrefixPath"
+                    Error="@(!IsSaved || HasError)" @onblur="OnFieldBlur"/>
         <MudIconButton Color="@(IsSaved ? Color.Default : Color.Success)" Icon="@Icons.Material.Filled.Save"
-                       Disabled="IsSaved" OnClick="Save"/>
+                    Disabled="IsSaved" OnClick="Save"/>
     </MudLink>
 </MudContainer>
 @if (AddDiv)
@@ -38,6 +40,11 @@
         base.OnInitialized();
     }
 
+    private void OnFieldBlur()
+    {
+        StateHasChanged();
+    }
+    
     private string GetLinkClasses()
     {
         var classes = new CssBuilder()
