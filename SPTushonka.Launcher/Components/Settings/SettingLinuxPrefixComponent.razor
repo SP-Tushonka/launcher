@@ -38,6 +38,17 @@
     {
         NewValue = ConfigHelper.GetConfig().LinuxSettings.PrefixPath;
 
+        if (string.IsNullOrEmpty(NewValue))
+        {
+            string detectedPath = ConfigHelper.TryDetectPrefixFromGamePath();
+            
+            if (!string.IsNullOrEmpty(detectedPath))
+            {
+                NewValue = detectedPath;
+                Save();
+            }
+        }
+
         base.OnInitialized();
     }
 

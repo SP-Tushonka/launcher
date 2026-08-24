@@ -371,6 +371,21 @@ public class ConfigHelper
         }
     }
 
+    public string TryDetectPrefixFromGamePath()
+    {
+        lock (_lock)
+        {
+            if (_settings!.GamePath.Contains("drive_c"))
+            {
+                return _settings!.GamePath.Split("/drive_c")[0];
+            }
+            else
+            {
+                return _settings!.LinuxSettings.PrefixPath;
+            }
+        }
+    }
+
     public bool IsPrefixPathValid(string path)
     {
         return !string.IsNullOrEmpty(path) && Directory.Exists(path) && File.Exists(Path.Combine(path, "system.reg"));
