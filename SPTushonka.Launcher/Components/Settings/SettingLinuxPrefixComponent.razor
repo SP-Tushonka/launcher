@@ -9,7 +9,7 @@
                     Margin="Margin.Dense" Adornment="Adornment.End"
                     AdornmentIcon="@Icons.Material.Filled.Folder"
                     AdornmentColor="Color.Info" OnAdornmentClick="SetPrefixPath"
-                    Error="@(!IsSaved || HasError)" @onblur="OnFieldBlur"/>
+                    Error="@(!IsSaved || HasError)"
         <MudIconButton Color="@(IsSaved ? Color.Default : Color.Success)" Icon="@Icons.Material.Filled.Save"
                     Disabled="IsSaved" OnClick="Save"/>
     </MudLink>
@@ -32,7 +32,7 @@
 
     // Compared against the config rather than a cached copy, so the button cant claim unsaved edits that arent there.
     private bool IsSaved => NewValue == ConfigHelper.GetConfig().LinuxSettings.PrefixPath;
-        
+
     protected override void OnInitialized()
     {
         NewValue = ConfigHelper.GetConfig().LinuxSettings.PrefixPath;
@@ -40,11 +40,6 @@
         base.OnInitialized();
     }
 
-    private void OnFieldBlur()
-    {
-        StateHasChanged();
-    }
-    
     private string GetLinkClasses()
     {
         var classes = new CssBuilder()
