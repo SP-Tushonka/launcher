@@ -10,6 +10,7 @@
                     AdornmentIcon="@Icons.Material.Filled.Folder"
                     AdornmentColor="Color.Info" OnAdornmentClick="SetPrefixPath"
                     Error="@(!IsSaved || HasError)"
+                    ErrorText="@(LocaleHelper.Get("setting_help_prefix"))"/>
         <MudIconButton Color="@(IsSaved ? Color.Default : Color.Success)" Icon="@Icons.Material.Filled.Save"
                     Disabled="IsSaved" OnClick="Save"/>
     </MudLink>

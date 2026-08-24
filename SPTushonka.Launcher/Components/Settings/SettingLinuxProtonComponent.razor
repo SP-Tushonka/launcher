@@ -7,6 +7,7 @@
     <MudLink Color="Color.Default" Underline="Underline.None" Disabled="Disabled" Class="@(GetLinkClasses())">
             <MudSelect T="string" PopoverClass="limited-height-select" Margin="Margin.Dense"
                     Label="@(LocaleHelper.Get("linux_proton_version"))" Error="@(HasError)"
+                    ErrorText="@(LocaleHelper.Get("setting_help_proton"))"
                     Style="margin-right: 20px;" Variant="Variant.Outlined"
                     Value="_selectedOption" ValueChanged="v => OnValueChanged(v)">
                 @foreach (var item in Options)
