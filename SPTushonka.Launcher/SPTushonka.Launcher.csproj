@@ -29,11 +29,8 @@
   <!-- Copies MudBlazor's static assets from the NuGet package: the stylesheet to wwwroot/css/ and the script to wwwroot/js/ -->
   <!-- If once built, you find the launcher looks broken, its probably because these didnt exist first -->
   <Target Name="CopyMudBlazor" BeforeTargets="PrepareForBuild">
-    <Copy
-      SourceFiles="$(NuGetPackageRoot)mudblazor/8.15.0/staticwebassets/MudBlazor.min.css"
-      DestinationFolder="$(ProjectDir)wwwroot/css"
-    />
-    <Copy SourceFiles="$(NuGetPackageRoot)mudblazor/8.15.0/staticwebassets/MudBlazor.min.js" DestinationFolder="$(ProjectDir)wwwroot/js" />
+    <Copy SourceFiles="$(NuGetPackageRoot)mudblazor/9.8.0/staticwebassets/MudBlazor.min.css" DestinationFolder="$(ProjectDir)wwwroot/css" />
+    <Copy SourceFiles="$(NuGetPackageRoot)mudblazor/9.8.0/staticwebassets/MudBlazor.min.js" DestinationFolder="$(ProjectDir)wwwroot/js" />
   </Target>
 
   <ItemGroup>

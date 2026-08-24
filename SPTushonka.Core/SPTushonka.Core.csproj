@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MudBlazor" Version="8.15.0" />
+    <PackageReference Include="MudBlazor" Version="9.8.0" />
     <PackageReference Include="Photino.Blazor" Version="4.0.13" />
     <PackageReference Include="SharpHDiffPatch.Core" Version="2.3.0" />
     <!-- Used the same as the installer does -->
