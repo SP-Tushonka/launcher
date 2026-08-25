@@ -5,11 +5,14 @@
 <MudContainer Class="pa-0">
     <MudLink Color="Color.Default" Underline="Underline.None" Disabled="Disabled" Class="@(GetLinkClasses())">
         <MudTextField @bind-Value="NewValue" Label="@(LocaleHelper.Get("linux_wine_prefix"))"
-                      Variant="Variant.Outlined" Immediate="true" Margin="Margin.Dense" Adornment="Adornment.End"
-                      AdornmentIcon="@Icons.Material.Filled.Folder" AdornmentColor="Color.Info" OnAdornmentClick="SetPrefixPath"
-                      Error="@(!IsSaved && HasError)"/>
+                    Variant="Variant.Outlined" Immediate="true"
+                    Margin="Margin.Dense" Adornment="Adornment.End"
+                    AdornmentIcon="@Icons.Material.Filled.Folder"
+                    AdornmentColor="Color.Info" OnAdornmentClick="SetPrefixPath"
+                    Error="@(!IsSaved || HasError)"
+                    ErrorText="@(LocaleHelper.Get("setting_help_prefix"))"/>
         <MudIconButton Color="@(IsSaved ? Color.Default : Color.Success)" Icon="@Icons.Material.Filled.Save"
-                       Disabled="IsSaved" OnClick="Save"/>
+                    Disabled="IsSaved" OnClick="Save"/>
     </MudLink>
 </MudContainer>
 @if (AddDiv)
@@ -18,7 +21,6 @@
 }
 
 @code {
-
     [Parameter]
     public bool Disabled { get; set; }
 
@@ -27,7 +29,7 @@
 
     private string NewValue { get; set; } = "";
 
-    private bool HasError = false;
+    private bool HasError => !ConfigHelper.IsPrefixPathValid(NewValue);
 
     // Compared against the config rather than a cached copy, so the button cant claim unsaved edits that arent there.
     private bool IsSaved => NewValue == ConfigHelper.GetConfig().LinuxSettings.PrefixPath;
@@ -35,6 +37,17 @@
     protected override void OnInitialized()
     {
         NewValue = ConfigHelper.GetConfig().LinuxSettings.PrefixPath;
+
+        if (string.IsNullOrEmpty(NewValue))
+        {
+            string detectedPath = ConfigHelper.TryDetectPrefixFromGamePath();
+            
+            if (!string.IsNullOrEmpty(detectedPath))
+            {
+                NewValue = detectedPath;
+                Save();
+            }
+        }
 
         base.OnInitialized();
     }
@@ -67,15 +80,13 @@
         }
 
         NewValue = folder.FirstOrDefault()!;
-        HasError = false;
         Save();
     }
 
     private void Save()
     {
-        if (!System.IO.Directory.Exists(NewValue))
+        if (HasError)
         {
-            HasError = true;
             Snackbar.Add(LocaleHelper.Get("setting_save_path_error_1"), Severity.Error);
             return;
         }

@@ -10,23 +10,6 @@ namespace SPTarkov.Core.Helpers;
 public class LinuxHelper(ILogger<LinuxHelper> logger, ConfigHelper configHelper)
 {
     /// <summary>
-    /// reconstruct path used when installing EFT on linux to work on linux, using symlinks in dosdevice in the winePrefix
-    /// </summary>
-    /// <param name="windowsLikePath"></param>
-    /// <returns></returns>
-    public string FixWithPrefixValidation(string? windowsLikePath)
-    {
-        var pathAndDrive = windowsLikePath?.Replace(@"\\", "/").Split(":");
-        var s = Path.Join(
-            configHelper.GetConfig().LinuxSettings.PrefixPath,
-            "dosdevices",
-            $"{pathAndDrive![0].ToLower()}:", // [0] is drive letter.
-            pathAndDrive[1] // [1] path to game on that drive
-        );
-        return s;
-    }
-
-    /// <summary>
     /// Runs an executable or Wine tool (<c>winecfg</c>, <c>winetricks</c>, <c>regedit</c>, etc.) inside the configured Wine/Proton
     /// prefix via <c>umu-run</c>.
     /// </summary>
@@ -42,30 +25,28 @@ public class LinuxHelper(ILogger<LinuxHelper> logger, ConfigHelper configHelper)
     public bool RunInPrefix(string cmd = "", List<string>? args = null)
     {
         // This looks something like: "/home/{username}/Games/tarkov"
-        // However this could be anything the user sets it too when they use MadBytes script.
         var prefixPath = configHelper.GetConfig().LinuxSettings.PrefixPath;
 
         // This looks something like this: "/home/{username}/.local/bin/umu-run"
         var umuPath = configHelper.GetConfig().LinuxSettings.UmuPath;
 
-        // this looks something like this: "GE-Proton10-24"
-        var proton = configHelper.GetConfig().LinuxSettings.ProtonVersion;
+        // this looks something like this: "/home/{username}/.steam/steam/compatibilitytools.d/GE-Proton11-5"
+        var protonPath = configHelper.GetConfig().LinuxSettings.ProtonVersion;
 
-        // This looks something like this: "WINEDLLOVERRIDES="winhttp=n,b" ENV2=2"
+        // This looks something like this: "MANGOHUD=1 PROTON_USE_XALIA=0 --disable-software-renderer"
         var defaultEnv = configHelper.GetConfig().LinuxSettings.DefaultEnv;
 
-        if (string.IsNullOrEmpty(prefixPath) || string.IsNullOrEmpty(umuPath) || string.IsNullOrEmpty(proton))
+        if (string.IsNullOrEmpty(prefixPath) || string.IsNullOrEmpty(umuPath) || string.IsNullOrEmpty(protonPath))
         {
-            logger.LogError("Prefix path or umu path or proton version are required");
+            logger.LogError("Prefix path and umu path and proton version are required");
             return false;
         }
 
-        // this looks something like: "/home/{username}/Games/tarkov/drive_c/SPTarkov"
+        // this looks something like: "/home/{username}/Games/SPT"
         var sptPath = configHelper.GetGamePath();
 
         ProcessStartInfo? process;
 
-        // I don't know if this actually helps in any way, but some use it
         // User must install gamemode from package manager, try catch below will log it
         if (configHelper.GetConfig().LinuxSettings.GameMode)
         {
@@ -75,7 +56,7 @@ public class LinuxHelper(ILogger<LinuxHelper> logger, ConfigHelper configHelper)
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 WorkingDirectory = sptPath,
-                Environment = { { "WINEPREFIX", prefixPath }, { "PROTONPATH", proton } },
+                Environment = { { "WINEPREFIX", prefixPath }, { "PROTONPATH", protonPath } },
                 ArgumentList = { umuPath, cmd },
             };
         }
@@ -87,7 +68,7 @@ public class LinuxHelper(ILogger<LinuxHelper> logger, ConfigHelper configHelper)
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 WorkingDirectory = sptPath,
-                Environment = { { "WINEPREFIX", prefixPath }, { "PROTONPATH", proton } },
+                Environment = { { "WINEPREFIX", prefixPath }, { "PROTONPATH", protonPath } },
                 ArgumentList = { cmd },
             };
         }
