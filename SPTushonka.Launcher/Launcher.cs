@@ -137,6 +137,20 @@ public class Launcher
                 $"Failed to set __NV_DISABLE_EXPLICIT_SYNC: error number: {Marshal.GetLastPInvokeErrorMessage()}"
             );
         }
+
+        // WebKitGTK's DMA-BUF/GBM compositing path can fail to allocate a buffer on some Nvidia driver setups,
+        // most reliably when the window is minimized/restored while the WebView is still starting up (which we
+        // do - see SetMinimized calls in CustomizeComponent/Home.razor). When it fails, WebKit logs
+        // "Failed to create GBM buffer of size WxH: Invalid argument" to stderr (not surfaced anywhere in our own
+        // logging) and the WebView never paints again, leaving a permanently blank window.
+        // Forcing the (slower, but reliable) shared-memory renderer avoids the GBM/DMA-BUF path entirely.
+        // https://bugs.webkit.org/show_bug.cgi?id=261874
+        if (LinuxHelper.SetEnvironmentVariableNative("WEBKIT_DISABLE_DMABUF_RENDERER", "1", 1) != 0)
+        {
+            throw new InvalidOperationException(
+                $"Failed to set WEBKIT_DISABLE_DMABUF_RENDERER: error number: {Marshal.GetLastPInvokeErrorMessage()}"
+            );
+        }
     }
 
     private static void CustomizeComponent()
