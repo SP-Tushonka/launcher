@@ -1,4 +1,5 @@
 ﻿@page "/Profile"
+@using SPTarkov.Core.Extensions
 
 @inject StateHelper StateHelper
 @inject GameHelper GameHelper
@@ -122,6 +123,10 @@
         if (ConfigHelper.GetConfig().MinimizeOnLaunch)
         {
             Launcher.App.MainWindow.SetMinimized(false);
+
+            // WebKitGTK on Linux can leave the WebView unpainted after this restore (blank grey window - see
+            // PhotinoWindowExtensions.NudgeRepaint). No-op on other platforms.
+            await Launcher.App.MainWindow.NudgeRepaint();
         }
 
         StateHelper.SetAllowNavigation(true);
