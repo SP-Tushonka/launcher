@@ -434,7 +434,6 @@ public class ConfigHelper
         {
             _logger.LogError("Umu path detection failed: {Exception}", ex);
             return _settings!.LinuxSettings.UmuPath;
-            ;
         }
     }
 
