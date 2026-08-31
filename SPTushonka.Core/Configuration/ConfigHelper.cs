@@ -424,7 +424,6 @@ public class ConfigHelper
 
             if (process.ExitCode == 0 && IsUmuPathValid(umuPath))
             {
-                SetLinuxUmuPath(umuPath);
                 return umuPath;
             }
 
