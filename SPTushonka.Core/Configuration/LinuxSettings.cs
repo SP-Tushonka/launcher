@@ -5,8 +5,8 @@ public record LinuxSettings
     /// <summary>Wine prefix root, e.g. <c>/home/cwx/Games/tarkov</c>.</summary>
     public string PrefixPath { get; set; } = "";
 
-    /// <summary>Path to the <c>umu-run</c> binary, e.g. <c>/home/cwx/.local/share/spt-additions/runtime/umu-run</c>.</summary>
-    public string UmuPath { get; set; } = "/usr/bin/umu-run";
+    /// <summary>Path to the <c>umu-run</c> binary, e.g. <c>/usr/bin/umu-run</c>.</summary>
+    public string UmuPath { get; set; } = "";
 
     /// <summary>
     /// Extra env vars and arguments in Steam launch-options format, e.g. <c>ENVVAR1=1 -Arg1="arg1 space" -Arg2=arg2</c>.

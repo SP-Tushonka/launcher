@@ -38,6 +38,12 @@
     {
         NewValue = ConfigHelper.GetConfig().LinuxSettings.UmuPath;
 
+        if (string.IsNullOrWhiteSpace(NewValue))
+        {
+            NewValue = ConfigHelper.TryDetectUmuPath();
+            ConfigHelper.SetLinuxUmuPath(NewValue);
+        }
+
         base.OnInitialized();
     }
 
