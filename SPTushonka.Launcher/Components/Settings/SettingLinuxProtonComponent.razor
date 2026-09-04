@@ -6,7 +6,8 @@
 <MudContainer Class="pa-0">
     <MudLink Color="Color.Default" Underline="Underline.None" Disabled="Disabled" Class="@(GetLinkClasses())">
             <MudSelect T="string" PopoverClass="limited-height-select" Margin="Margin.Dense"
-                    Label="@(LocaleHelper.Get("linux_proton_version"))"
+                    Label="@(LocaleHelper.Get("linux_proton_version"))" Error="@(HasError)"
+                    ErrorText="@(LocaleHelper.Get("setting_help_proton"))"
                     Style="margin-right: 20px;" Variant="Variant.Outlined"
                     Value="_selectedOption" ValueChanged="v => OnValueChanged(v)">
                 @foreach (var item in Options)
@@ -36,6 +37,8 @@
         await base.OnInitializedAsync();
     }
 
+    private string _selectedOption = "";
+
     [Parameter]
     public bool Disabled { get; set; }
     [Parameter]
@@ -45,7 +48,7 @@
 
     private List<string> Options { get; set; } = [];
 
-    private string _selectedOption = "";
+    private bool HasError => !ConfigHelper.IsProtonVersionValid(_selectedOption);
 
     private async Task AddProtonPath()
     {
@@ -57,7 +60,7 @@
             return;
         }
 
-        NewValue = folder.FirstOrDefault()!;
+        NewValue = folder.FirstOrDefault("");
         
         if (Save())
         {
@@ -86,7 +89,7 @@
     
     private bool Save()
     {
-        if (!ConfigHelper.AddLinuxProtonPath(NewValue))
+        if (!ConfigHelper.AddLinuxProtonSearchPath(NewValue))
         {
             Snackbar.Add(LocaleHelper.Get("setting_save_path_error_2"), Severity.Warning);
             return false;

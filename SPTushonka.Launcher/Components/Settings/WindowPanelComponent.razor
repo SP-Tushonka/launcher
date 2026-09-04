@@ -1,9 +1,10 @@
-@inject ConfigHelper ConfigHelper
+﻿@inject ConfigHelper ConfigHelper
 @inject LocaleHelper LocaleHelper
 
 <SettingsSectionComponent Title="@(LocaleHelper.Get("setting_section_window"))">
-    <SettingSwitchComponent Switch="@CloseToTraySwitch" OptionName="@(LocaleHelper.Get("setting_close"))" SwitchFunc="SetCloseToTray" Disabled="!IsWindows"/>
+    <SettingSwitchComponent Switch="@CloseToTraySwitch" OptionName="@(LocaleHelper.Get("setting_close"))" SwitchFunc="SetCloseToTray" Disabled="!IsWindows || CloseOnGameStartSwitch"/>
     <SettingSwitchComponent Switch="@MinimizeOnLaunchSwitch" OptionName="@(LocaleHelper.Get("setting_minimize"))" SwitchFunc="SetMinimizeOnLaunch"/>
+    <SettingSwitchComponent Switch="@CloseOnGameStartSwitch" OptionName="@(LocaleHelper.Get("setting_close_on_game_start"))" SwitchFunc="SetCloseOnGameStart"/>
     <SettingSwitchComponent Switch="@AlwaysOnTopSwitch" OptionName="@(LocaleHelper.Get("setting_always_top"))" SwitchFunc="SetAlwaysOnTop" Disabled="!IsWindows"/>
 </SettingsSectionComponent>
 
@@ -11,6 +12,7 @@
 {
     private bool CloseToTraySwitch { get; set; }
     private bool MinimizeOnLaunchSwitch { get; set; }
+    private bool CloseOnGameStartSwitch { get; set; }
     private bool AlwaysOnTopSwitch { get; set; }
 
     private bool IsWindows => OperatingSystem.IsWindows();
@@ -20,6 +22,7 @@
         var settings = ConfigHelper.GetConfig();
         CloseToTraySwitch = settings.CloseToTray;
         MinimizeOnLaunchSwitch = settings.MinimizeOnLaunch;
+        CloseOnGameStartSwitch = settings.CloseOnGameStart;
         AlwaysOnTopSwitch = settings.AlwaysTop;
 
         base.OnInitialized();
@@ -38,6 +41,19 @@
     {
         MinimizeOnLaunchSwitch = !MinimizeOnLaunchSwitch;
         ConfigHelper.SetMinimizeOnLaunch(MinimizeOnLaunchSwitch);
+
+        return Task.CompletedTask;
+    }
+
+    private Task SetCloseOnGameStart()
+    {
+        CloseOnGameStartSwitch = !CloseOnGameStartSwitch;
+        ConfigHelper.SetCloseOnGameStart(CloseOnGameStartSwitch);
+
+        if (CloseOnGameStartSwitch)
+        {
+            CloseToTraySwitch = false;
+        }
 
         return Task.CompletedTask;
     }

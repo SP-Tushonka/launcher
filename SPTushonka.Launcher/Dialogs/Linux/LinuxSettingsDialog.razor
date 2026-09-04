@@ -7,120 +7,48 @@
     <DialogContent>
         <MudContainer Class="py-4">
             <MudAlert Variant="Variant.Outlined" Severity="Severity.Warning">@(LocaleHelper.Get("linux_add_warning"))</MudAlert>
-            <MudForm @ref="_form" Model="LinuxSettings" @bind-IsValid="@_success" Class="gap-2 mt-3">
-
-                <MudTextField Immediate="true" @bind-Value="LinuxSettings!.PrefixPath" Label="@(LocaleHelper.Get("linux_add_prefix"))"
-                              Required="true" RequiredError="@(LocaleHelper.Get("linux_add_prefix_required"))" Variant="Variant.Outlined"
-                              Margin="Margin.Dense" HelperText="/home/cwx/Games/tarkov" HelperTextOnFocus="true" Adornment="Adornment.End"
-                              AdornmentIcon="@Icons.Material.Filled.Folder" AdornmentColor="Color.Default"
-                              OnAdornmentClick="SetPrefixPath" 
-                              Error="@(PrefixError)"/>
-
-                <MudTextField Immediate="true" @bind-Value="LinuxSettings!.UmuPath" Label="@(LocaleHelper.Get("linux_add_umu"))"
-                              Required="true" RequiredError="@(LocaleHelper.Get("linux_add_umu_required"))" Variant="Variant.Outlined"
-                              Margin="Margin.Dense" HelperText="/home/cwx/.local/share/spt-additions/runtime/umu-run"
-                              HelperTextOnFocus="true" AdornmentIcon="@Icons.Material.Filled.Folder" Adornment="Adornment.End"
-                              AdornmentColor="Color.Default" OnAdornmentClick="SetUmuPath"
-                              Error="@(UmuError)"/>
-
-                <MudTextField Immediate="true" @bind-Value="LinuxSettings!.LaunchSettings"
-                              Label="@(LocaleHelper.Get("linux_add_launch_settings"))"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense"
-                              Placeholder="@(LocaleHelper.Get("linux_add_launch_settings_placeholder"))"/>
-
-                <MudSelect T="string" @bind-Value="LinuxSettings!.ProtonVersion" Clearable="false" Required="true"
-                           PopoverClass="limited-height-select" Label="@(LocaleHelper.Get("linux_add_proton"))"
-                           RequiredError="@(LocaleHelper.Get("linux_add_proton_required"))" Variant="Variant.Outlined"
-                           Margin="Margin.Dense" Placeholder="@(LocaleHelper.Get("linux_add_proton_placeholder"))">
-                    @foreach (var item in ProtonList)
-                    {
-                        <MudSelectItem Value="@item">@item</MudSelectItem>
-                    }
-                </MudSelect>
-            </MudForm>
+            <SettingLinuxPrefixComponent Disabled="false" AddDiv="false"/>
+            <SettingLinuxUmuComponent Disabled="false" AddDiv="false"/>
+            <SettingLinuxLaunchComponent Disabled="false" AddDiv="false"/>
+            <SettingLinuxProtonComponent Disabled="false" AddDiv="false"/>
             <MudContainer Class="mt-3 d-flex justify-end pa-0 gap-2">
                 <MudButton Class="mud-button-border-copy border-2 border-solid mud-button-inner-text-copy ml-auto" Variant="Variant.Filled"
-                           Color="Color.Primary" Disabled="@(!_success || UmuError || PrefixError)"
-                           OnClick="Submit">@(LocaleHelper.Get("linux_add_confirm"))</MudButton>
+                        Color="Color.Primary"
+                        OnClick="Submit">@(LocaleHelper.Get("linux_add_confirm"))</MudButton>
             </MudContainer>
         </MudContainer>
     </DialogContent>
 </MudDialog>
 
 @code {
-
-    private bool _success;
-    private MudForm? _form;
     private List<string> ProtonList { get; set; } = [];
 
-    public LinuxSettings? LinuxSettings { get; set; } = new();
+    private LinuxSettings? LinuxSettings;
 
     [CascadingParameter] private IMudDialogInstance? MudDialog { get; set; }
 
-    private bool UmuError => string.IsNullOrEmpty(LinuxSettings!.UmuPath) || 
-                            !System.IO.File.Exists(LinuxSettings.UmuPath) || 
-                            System.IO.Path.GetFileName(LinuxSettings.UmuPath) != "umu-run";
-
-    private bool PrefixError => string.IsNullOrEmpty(LinuxSettings!.PrefixPath) || 
-                                !System.IO.Directory.Exists(LinuxSettings.PrefixPath);
-
-    private bool PathsAreValid => !UmuError && !PrefixError;
+    private bool HasError => !ConfigHelper.IsPrefixPathValid(LinuxSettings!.PrefixPath) ||
+                            !ConfigHelper.IsUmuPathValid(LinuxSettings!.UmuPath) ||
+                            !ConfigHelper.IsProtonVersionValid(LinuxSettings!.ProtonVersion);
 
     protected override async Task OnParametersSetAsync()
     {
         ProtonList = await LinuxHelper.GetProtonVersions();
-        LinuxSettings!.ProtonVersion = ProtonList.FirstOrDefault("GE-Proton11-1");
+        LinuxSettings = ConfigHelper.GetConfig().LinuxSettings;
+        LinuxSettings!.ProtonVersion = ProtonList.FirstOrDefault("");
 
         await base.OnParametersSetAsync();
     }
 
     private void Submit()
     {
-        if (!PathsAreValid)
+        if (HasError)
         {
-            Snackbar.Add(LocaleHelper.Get("setting_save_path_error_1"), Severity.Error);
+            Snackbar.Add(LocaleHelper.Get("setting_confirm_error_1"), Severity.Error);
             return;
         }
-
-        ConfigHelper.SetLinuxSettings(LinuxSettings!);
 
         Snackbar.Add(LocaleHelper.Get("linux_add_success"), Severity.Success);
         MudDialog!.Close(DialogResult.Ok(true));
     }
-
-    private async Task SetUmuPath()
-    {
-        // umu-run is a file, a folder dialog cant select it
-        var file = await Launcher.App.MainWindow.ShowOpenFileAsync(title: "Choose umu-run",
-            defaultPath: FilePickerHelper.StartDirectory(LinuxSettings!.UmuPath));
-
-        // no file was selected
-        if (!file.Any())
-        {
-            return;
-        }
-
-        LinuxSettings!.UmuPath = file.FirstOrDefault()!;
-
-        // the picker sets the model directly, so the form doesnt know its fields changed
-        await _form!.Validate();
-    }
-
-    private async Task SetPrefixPath()
-    {
-        var folder = await Launcher.App.MainWindow.ShowOpenFolderAsync(title: "Choose Folder",
-            defaultPath: FilePickerHelper.StartDirectory(LinuxSettings!.PrefixPath));
-
-        // no folder was selected
-        if (!folder.Any())
-        {
-            return;
-        }
-
-        LinuxSettings!.PrefixPath = folder.FirstOrDefault()!;
-
-        await _form!.Validate();
-    }
-
 }

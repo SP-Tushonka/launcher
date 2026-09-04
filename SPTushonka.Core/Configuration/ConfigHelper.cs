@@ -1,4 +1,5 @@
-﻿using System.Text.Encodings.Web;
+﻿using System.Diagnostics;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using MudBlazor;
@@ -190,6 +191,22 @@ public class ConfigHelper
         }
     }
 
+    public void SetCloseOnGameStart(bool closeOnGameStart)
+    {
+        lock (_lock)
+        {
+            _logger.LogDebug("SetCloseOnGameStart: {CloseOnGameStart}", closeOnGameStart);
+            _settings!.CloseOnGameStart = closeOnGameStart;
+
+            if (closeOnGameStart)
+            {
+                _settings.CloseToTray = false;
+            }
+
+            SaveConfig();
+        }
+    }
+
     public void SetAlwaysOnTop(bool alwaysOnTop)
     {
         lock (_lock)
@@ -260,15 +277,15 @@ public class ConfigHelper
         }
     }
 
-    public bool AddLinuxProtonPath(string linuxProtonPath)
+    public bool AddLinuxProtonSearchPath(string linuxProtonSearchPath)
     {
         lock (_lock)
         {
-            _logger.LogDebug("AddLinuxProtonPath: {ProtonPath}", linuxProtonPath);
+            _logger.LogDebug("AddLinuxProtonSearchPath: {ProtonSearchPath}", linuxProtonSearchPath);
 
-            if (!_settings!.LinuxSettings.ProtonPaths.Contains(linuxProtonPath))
+            if (!_settings!.LinuxSettings.ProtonPaths.Contains(linuxProtonSearchPath))
             {
-                _settings.LinuxSettings.ProtonPaths.Add(linuxProtonPath);
+                _settings.LinuxSettings.ProtonPaths.Add(linuxProtonSearchPath);
                 SaveConfig();
             }
             else
@@ -369,5 +386,68 @@ public class ConfigHelper
             _settings!.LinuxSettings = linuxSettings;
             SaveConfig();
         }
+    }
+
+    public string TryDetectPrefixFromGamePath()
+    {
+        lock (_lock)
+        {
+            if (_settings!.GamePath.Contains("drive_c"))
+            {
+                return _settings!.GamePath.Split("/drive_c")[0];
+            }
+            else
+            {
+                return _settings!.LinuxSettings.PrefixPath;
+            }
+        }
+    }
+
+    public string TryDetectUmuPath()
+    {
+        // 'command -v' only returns a single path or nothing if umu-run isn't found
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "/bin/sh",
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            ArgumentList = { "-c", "command -v umu-run" },
+        };
+
+        try
+        {
+            var process = Process.Start(startInfo);
+            var umuPath = process!.StandardOutput.ReadToEnd().Trim();
+
+            process.WaitForExit();
+
+            if (process.ExitCode == 0 && IsUmuPathValid(umuPath))
+            {
+                return umuPath;
+            }
+
+            return _settings!.LinuxSettings.UmuPath;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Umu path detection failed: {Exception}", ex);
+            return _settings!.LinuxSettings.UmuPath;
+        }
+    }
+
+    public bool IsPrefixPathValid(string path)
+    {
+        return !string.IsNullOrEmpty(path) && Directory.Exists(path) && File.Exists(Path.Combine(path, "system.reg"));
+    }
+
+    public bool IsUmuPathValid(string path)
+    {
+        return !string.IsNullOrEmpty(path) && File.Exists(path) && Path.GetFileName(path) == "umu-run";
+    }
+
+    public bool IsProtonVersionValid(string path)
+    {
+        return !string.IsNullOrEmpty(path) && Directory.Exists(path);
     }
 }
