@@ -18,7 +18,7 @@ public class Paths
     };
 
     public static readonly string PatchPath = Path.Join(_runtimeRoot, "SPT_Data", "Launcher", "Patches");
-    public static readonly string CoreDllPath = Path.Join("BepInEx", "plugins", "spt", "spt-core.dll");
+    public static readonly string CoreDllPath = Path.Join("BepInEx", "plugins", "sptushonka", "SPTushonka.Core.dll");
     public static readonly string HwechoDllPath = Path.Join("EscapeFromTarkov_Data", "Plugins", "x86_64", "hwecho.dll");
     public static readonly string SptRegJson = Path.Join(_runtimeRoot, "user", "sptRegistry", "registry.json");
     public static readonly string LocalesPath = Path.Join(_runtimeRoot, "SPT_Data", "Launcher", "Locales");

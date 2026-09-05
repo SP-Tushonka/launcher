@@ -110,6 +110,19 @@ public class LinuxHelper(ILogger<LinuxHelper> logger, ConfigHelper configHelper)
             process.Environment[token[..separator]] = value;
         }
 
+        var overrides = process.Environment.TryGetValue("WINEDLLOVERRIDES", out var existing) ? existing ?? "" : "";
+        foreach (var dll in new[] { "winhttp", "version" })
+        {
+            if (overrides.Contains($"{dll}=", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            overrides = string.IsNullOrEmpty(overrides) ? $"{dll}=n,b" : $"{overrides};{dll}=n,b";
+        }
+
+        process.Environment["WINEDLLOVERRIDES"] = overrides;
+
         try
         {
             Process.Start(process);

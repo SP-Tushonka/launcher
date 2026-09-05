@@ -233,7 +233,7 @@ public class GameHelper
             var coreDllPath = Path.Join(_configHelper.GetGamePath(), Paths.CoreDllPath);
             if (!File.Exists(coreDllPath))
             {
-                _logger.LogError("spt-core.dll missing: {coreDllPath}", coreDllPath);
+                _logger.LogError("Core dll missing: {coreDllPath}", coreDllPath);
             }
 
             // Read the DLL's numeric parts directly; its FileVersion may carry a 4th (revision) segment that SemVer rejects.
@@ -244,7 +244,7 @@ public class GameHelper
                 coreDllVersionInfo.FileBuildPart
             );
 
-            _logger.LogInformation("server version: {serverVersion} - spt-core.dll version: {DllVersion}", serverVersion, dllVersion);
+            _logger.LogInformation("server version: {serverVersion} - core dll version: {DllVersion}", serverVersion, dllVersion);
 
             // Edge case, running on locally built modules dlls, ignore check and return ok
             if (
