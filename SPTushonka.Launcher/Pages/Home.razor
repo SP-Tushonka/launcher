@@ -50,20 +50,19 @@
         _serverList = ConfigHelper.GetServers();
         Launcher.App.MainWindow.SetMinimized(false);
 
-        var prefixPath = ConfigHelper.GetConfig().LinuxSettings.PrefixPath;
-        var prefixValid = ConfigHelper.IsPrefixPathValid(prefixPath);
-
-        var umuPath = ConfigHelper.GetConfig().LinuxSettings.UmuPath;
-        var umuValid = ConfigHelper.IsUmuPathValid(umuPath);
-
-        var ProtonVersion = ConfigHelper.GetConfig().LinuxSettings.ProtonVersion;
-        var protonValid = ConfigHelper.IsProtonVersionValid(ProtonVersion);
-
-        if (OperatingSystem.IsLinux() && (!prefixValid || !umuValid || !protonValid))
+        if (OperatingSystem.IsLinux())
         {
-            await ShowLinuxSettingsDialog();
+            var linuxSettings = ConfigHelper.GetConfig().LinuxSettings;
+            var prefixValid = ConfigHelper.IsPrefixPathValid(linuxSettings!.PrefixPath);
+            var umuValid = ConfigHelper.IsUmuPathValid(linuxSettings!.UmuPath);
+            var protonValid = ConfigHelper.IsProtonVersionValid(linuxSettings!.ProtonVersion);
+
+            if (!prefixValid || !umuValid || !protonValid)
+            {
+                await ShowLinuxSettingsDialog();
+            }
         }
-        
+
         await base.OnInitializedAsync();
         await TryAutoConnect();
     }
