@@ -436,6 +436,16 @@ public class ConfigHelper
         }
     }
 
+    public bool IsGamePathValid(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || File.Exists(path) || !Path.IsPathRooted(path))
+        {
+            return false;
+        }
+
+        return Directory.Exists(Path.Combine(path, "SPT_Runtime"));
+    }
+
     public bool IsPrefixPathValid(string path)
     {
         if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path) || !Path.IsPathRooted(path))
