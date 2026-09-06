@@ -1,15 +1,15 @@
-@inject ConfigHelper ConfigHelper
-@inject LocaleHelper LocaleHelper
-@inject ISnackbar Snackbar
+@inherits SettingComponentBase
 
 <MudContainer Class="pa-0">
     <MudLink Color="Color.Default" Underline="Underline.None" Disabled="Disabled" Class="@(GetLinkClasses())">
-        <MudTextField @bind-Value="NewValue" Label="@(LocaleHelper.Get("linux_wine_prefix"))"
+        <MudTextField T="string" Value="@NewValue"
+                    ValueChanged="@OnNewValueChanged"
+                    Label="@(LocaleHelper.Get("linux_wine_prefix"))"
                     Variant="Variant.Outlined" Immediate="true"
                     Margin="Margin.Dense" Adornment="Adornment.End"
                     AdornmentIcon="@Icons.Material.Filled.Folder"
-                    AdornmentColor="Color.Info" OnAdornmentClick="SetPrefixPath"
-                    Error="@(!IsSaved || HasError)"
+                    AdornmentColor="Color.Info" OnAdornmentClick="SetFolderPath"
+                    Error="@(HasError)"
                     ErrorText="@(LocaleHelper.Get("setting_help_prefix"))"/>
         <MudIconButton Color="@(IsSaved ? Color.Default : Color.Success)" Icon="@Icons.Material.Filled.Save"
                     Disabled="IsSaved" OnClick="Save"/>
@@ -21,78 +21,33 @@
 }
 
 @code {
-    [Parameter]
-    public bool Disabled { get; set; }
-
-    [Parameter]
-    public bool AddDiv { get; set; }
-
-    private string NewValue { get; set; } = "";
-
-    private bool HasError => !ConfigHelper.IsPrefixPathValid(NewValue);
 
     // Compared against the config rather than a cached copy, so the button cant claim unsaved edits that arent there.
     private bool IsSaved => NewValue == ConfigHelper.GetConfig().LinuxSettings.PrefixPath;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         NewValue = ConfigHelper.GetConfig().LinuxSettings.PrefixPath;
 
         if (string.IsNullOrEmpty(NewValue))
         {
-            string detectedPath = ConfigHelper.TryDetectPrefixFromGamePath();
-            
-            if (!string.IsNullOrEmpty(detectedPath))
-            {
-                NewValue = detectedPath;
-                Save();
-            }
+            NewValue = ConfigHelper.TryDetectPrefixFromGamePath();
+            await SaveValue();
         }
 
-        base.OnInitialized();
+        HasError = !ValidateValue();
+
+        await base.OnInitializedAsync();
     }
 
-    private string GetLinkClasses()
+    protected override async Task SaveValue()
     {
-        var classes = new CssBuilder()
-            .AddClass("d-flex")
-            .AddClass("justify-center")
-            .AddClass("align-center")
-            .AddClass("py-2")
-            .AddClass("pl-5");
-
-        if (!Disabled)
-        {
-            classes.AddClass("cursor-pointer").AddClass("setting-on-hover");
-        }
-
-        return classes.Build();
-    }
-
-    private async Task SetPrefixPath()
-    {
-        var folder = await Launcher.App.MainWindow.ShowOpenFolderAsync(title: "Choose Folder", defaultPath: FilePickerHelper.StartDirectory(NewValue));
-
-        // no folder was selected
-        if (!folder.Any())
-        {
-            return;
-        }
-
-        NewValue = folder.FirstOrDefault()!;
-        Save();
-    }
-
-    private void Save()
-    {
-        if (HasError)
-        {
-            Snackbar.Add(LocaleHelper.Get("setting_save_path_error_1"), Severity.Error);
-            return;
-        }
-
         ConfigHelper.SetLinuxPrefixPath(NewValue);
-        StateHasChanged();
+    }
+
+    protected override bool ValidateValue()
+    {
+        return ConfigHelper.IsPrefixPathValid(NewValue);
     }
 
 }

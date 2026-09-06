@@ -1,5 +1,4 @@
-﻿@inject LocaleHelper LocaleHelper
-@inject ConfigHelper ConfigHelper
+﻿@inherits SettingComponentBase
 @inject NavigationManager NavigationManager
 
 <MudContainer Class="pa-0">
@@ -26,12 +25,6 @@
         _selectedOption = ConfigHelper.GetConfig().Language;
         base.OnInitialized();
     }
-
-    [Parameter]
-    public bool Disabled { get; set; }
-
-    [Parameter]
-    public bool AddDiv { get; set; }
 
     [Parameter]
     public Dictionary<string, string> Options { get; set; } = [];

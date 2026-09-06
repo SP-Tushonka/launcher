@@ -1,15 +1,18 @@
-@inject ConfigHelper ConfigHelper
-@inject LocaleHelper LocaleHelper
-@inject ISnackbar Snackbar
+@inherits SettingComponentBase
 
 <MudContainer Class="pa-0">
-    <SettingSwitchComponent Switch="@Enabled" OptionName="@(LocaleHelper.Get("setting_set_game_path"))" SwitchFunc="SetEnabled" />
+    <SettingSwitchComponent Switch="@(Enabled)" OptionName="@(LocaleHelper.Get("setting_set_game_path"))" SwitchFunc="SetEnabled" />
     <MudLink Color="Color.Default" Underline="Underline.None" Disabled="!Enabled" Class="@(GetLinkClasses())">
-        <MudTextField @bind-Value="NewValue" Label="@(LocaleHelper.Get("setting_game_path"))" Variant="Variant.Outlined" Immediate="true"
-                      Margin="Margin.Dense" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Folder" AdornmentColor="Color.Info"
-                      OnAdornmentClick="SetGamePath" Error="@(!IsSaved && HasError)" Disabled="!Enabled" />
+        <MudTextField T="string" Value="@NewValue"
+                    ValueChanged="@OnNewValueChanged"
+                    Label="@(LocaleHelper.Get("setting_game_path"))"
+                    Variant="Variant.Outlined" Immediate="true"
+                    Margin="Margin.Dense" Adornment="Adornment.End"
+                    AdornmentIcon="@Icons.Material.Filled.Folder"
+                    AdornmentColor="Color.Info" OnAdornmentClick="SetFolderPath"
+                    Error="@(HasError)" Disabled="!Enabled" />
         <MudIconButton Color="@(IsSaved ? Color.Default : Color.Success)" Icon="@Icons.Material.Filled.Save"
-                       Disabled="IsSaved || !Enabled" OnClick="Save"/>
+                    Disabled="IsSaved || !Enabled" OnClick="Save"/>
     </MudLink>
 </MudContainer>
 @if (AddDiv)
@@ -22,25 +25,19 @@
     [Parameter]
     public bool Enabled { get; set; }
 
-    [Parameter]
-    public bool AddDiv { get; set; }
-
-    private string NewValue { get; set; } = "";
-
-    private bool HasError = false;
-
     // Compared against the config rather than a cached copy, so the button cant claim unsaved edits that arent there.
     private bool IsSaved => NewValue == ConfigHelper.GetConfig().GamePath;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         Enabled = ConfigHelper.GetConfig().EnableGamePath;
-        NewValue = NewValue = ConfigHelper.GetGamePath(); 
+        NewValue = ConfigHelper.GetGamePath(); 
+        HasError = !ValidateValue();
 
-        base.OnInitialized();
+        await base.OnInitializedAsync();
     }
 
-    private string GetLinkClasses()
+    protected override string GetLinkClasses()
     {
         var classes = new CssBuilder()
             .AddClass("d-flex")
@@ -49,7 +46,7 @@
             .AddClass("py-2")
             .AddClass("pl-5");
 
-        if (!Enabled)
+        if (Enabled)
         {
             classes.AddClass("cursor-pointer").AddClass("setting-on-hover");
         }
@@ -57,19 +54,14 @@
         return classes.Build();
     }
 
-    private async Task SetGamePath()
+    protected override async Task SaveValue()
     {
-        var folder = await Launcher.App.MainWindow.ShowOpenFolderAsync(title: "Choose Folder", defaultPath: FilePickerHelper.StartDirectory(NewValue));
+        ConfigHelper.SetGamePath(NewValue);
+    }
 
-        // no folder was selected
-        if (!folder.Any())
-        {
-            return;
-        }
-
-        NewValue = folder.FirstOrDefault()!;
-        HasError = false;
-        Save();
+    protected override bool ValidateValue()
+    {
+        return ConfigHelper.IsGamePathValid(NewValue);
     }
 
     private Task SetEnabled()
@@ -78,21 +70,9 @@
 
         ConfigHelper.SetEnableGamePath(Enabled);
         NewValue = ConfigHelper.GetGamePath();
+        HasError = !ValidateValue();
 
         return Task.CompletedTask;
-    }
-
-    private void Save()
-    {
-        if (!System.IO.Directory.Exists(NewValue))
-        {
-            HasError = true;
-            Snackbar.Add(LocaleHelper.Get("setting_save_path_error_1"), Severity.Error);
-            return;
-        }
-
-        ConfigHelper.SetGamePath(NewValue);
-        StateHasChanged();
     }
 
 }
