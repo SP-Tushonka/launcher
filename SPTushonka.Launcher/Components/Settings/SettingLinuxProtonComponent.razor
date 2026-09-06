@@ -1,15 +1,14 @@
-@inject LocaleHelper LocaleHelper
-@inject ConfigHelper ConfigHelper
+@inherits SettingComponentBase
 @inject LinuxHelper LinuxHelper
-@inject ISnackbar Snackbar
 
 <MudContainer Class="pa-0">
     <MudLink Color="Color.Default" Underline="Underline.None" Disabled="Disabled" Class="@(GetLinkClasses())">
-            <MudSelect T="string" PopoverClass="limited-height-select" Margin="Margin.Dense"
+            <MudSelect T="string" Value="@NewValue"
+                    ValueChanged="@OnValueChanged"
+                    PopoverClass="limited-height-select" Margin="Margin.Dense"
                     Label="@(LocaleHelper.Get("linux_proton_version"))" Error="@(HasError)"
                     ErrorText="@(LocaleHelper.Get("setting_help_proton"))"
-                    Style="margin-right: 20px;" Variant="Variant.Outlined"
-                    Value="_selectedOption" ValueChanged="v => OnValueChanged(v)">
+                    Style="margin-right: 20px;" Variant="Variant.Outlined">
                 @foreach (var item in Options)
                 {
                     <MudSelectItem Value="@item">@item</MudSelectItem>
@@ -30,29 +29,23 @@
 
 @code {
 
+    private List<string> Options { get; set; } = [];
+
     protected override async Task OnInitializedAsync()
     {
-        _selectedOption = ConfigHelper.GetConfig().LinuxSettings.ProtonVersion;
+        NewValue = ConfigHelper.GetConfig().LinuxSettings.ProtonVersion;
         Options = await LinuxHelper.GetProtonVersions();
+        HasError = !ValidateValue();
+
         await base.OnInitializedAsync();
     }
 
-    private string _selectedOption = "";
-
-    [Parameter]
-    public bool Disabled { get; set; }
-    [Parameter]
-    public bool AddDiv { get; set; }
-
-    private string NewValue { get; set; } = "";
-
-    private List<string> Options { get; set; } = [];
-
-    private bool HasError => !ConfigHelper.IsProtonVersionValid(_selectedOption);
-
     private async Task AddProtonPath()
     {
-        var folder = await Launcher.App.MainWindow.ShowOpenFolderAsync(title: "Choose a Folder", defaultPath: FilePickerHelper.StartDirectory(NewValue));
+        var folder = await Launcher.App.MainWindow.ShowOpenFolderAsync(
+            title: "Choose Folder",
+            defaultPath: FilePickerHelper.StartDirectory(NewValue)
+        );
 
         // no folder was selected
         if (!folder.Any())
@@ -60,49 +53,35 @@
             return;
         }
 
-        NewValue = folder.FirstOrDefault("");
-        
-        if (Save())
-        {
-            Options = await LinuxHelper.GetProtonVersions();
-        }
-        
-        StateHasChanged();
-    }
+        var folderPath = folder.FirstOrDefault("");
 
-    private string GetLinkClasses()
-    {
-        var classes = new CssBuilder()
-            .AddClass("d-flex")
-            .AddClass("justify-center")
-            .AddClass("align-center")
-            .AddClass("py-2")
-            .AddClass("pl-5");
-
-        if (!Disabled)
-        {
-            classes.AddClass("cursor-pointer").AddClass("setting-on-hover");
-        }
-
-        return classes.Build();
-    }
-    
-    private bool Save()
-    {
-        if (!ConfigHelper.AddLinuxProtonSearchPath(NewValue))
+        if (!ConfigHelper.AddLinuxProtonSearchPath(folderPath))
         {
             Snackbar.Add(LocaleHelper.Get("setting_save_path_error_2"), Severity.Warning);
-            return false;
+            return;
         }
 
         Snackbar.Add(LocaleHelper.Get("setting_save_path_success"), Severity.Success);
-        return true;
+        
+        Options = await LinuxHelper.GetProtonVersions();
+        NewValue = Options.FirstOrDefault(ConfigHelper.GetConfig().LinuxSettings.ProtonVersion);
+
+        await Save();
     }
 
-    private void OnValueChanged(string value)
+    protected override async Task SaveValue()
     {
-        _selectedOption = value;
-        ConfigHelper.SetLinuxProtonVersion(value);
-        StateHasChanged();
+        ConfigHelper.SetLinuxProtonVersion(NewValue);
+    }
+
+    protected override bool ValidateValue()
+    {
+        return ConfigHelper.IsProtonVersionValid(NewValue);
+    }
+
+    private async Task OnValueChanged(string value)
+    {
+        NewValue = value;
+        await Save();
     }
 }

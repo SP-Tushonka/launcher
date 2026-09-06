@@ -219,10 +219,7 @@ public class LinuxHelper(ILogger<LinuxHelper> logger, ConfigHelper configHelper)
 
             foreach (var directory in Directory.EnumerateDirectories(rootPath))
             {
-                // Used to verify Proton directories
-                string compatFilePath = Path.Combine(directory, "compatibilitytool.vdf");
-
-                if (directory.Contains("LegacyRuntime") || !File.Exists(compatFilePath))
+                if (!configHelper.IsProtonVersionValid(directory))
                 {
                     continue;
                 }

@@ -1,4 +1,6 @@
-﻿<MudContainer Class="pa-0">
+﻿@inherits SettingComponentBase
+
+<MudContainer Class="pa-0">
     <MudLink Color="Color.Default" Underline="Underline.None" Disabled="Disabled" Class="@(GetLinkClasses())" OnClick="SwitchFunc">
         <MudText Class="@(GetTextClasses())">@OptionName</MudText>
         <MudSpacer/>
@@ -11,25 +13,6 @@
 }
 
 @code {
-
-    private string GetLinkClasses()
-    {
-        var classes = new CssBuilder()
-            .AddClass("d-flex")
-            .AddClass("justify-center")
-            .AddClass("align-center")
-            .AddClass("py-2")
-            .AddClass("pl-5")
-            .AddClass("pr-2");
-
-        if (!Disabled)
-        {
-            classes.AddClass("cursor-pointer").AddClass("setting-on-hover");
-        }
-
-        return classes.Build();
-    }
-
     private string GetTextClasses()
     {
         var classes = new CssBuilder().AddClass("no-select");
@@ -41,10 +24,6 @@
 
         return classes.Build();
     }
-
-    [Parameter] public bool Disabled { get; set; }
-
-    [Parameter] public bool AddDiv { get; set; }
 
     [Parameter] public bool Switch { get; set; }
 

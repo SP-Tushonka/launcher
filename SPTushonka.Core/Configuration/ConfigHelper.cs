@@ -436,18 +436,43 @@ public class ConfigHelper
         }
     }
 
+    public bool IsGamePathValid(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || File.Exists(path) || !Path.IsPathRooted(path))
+        {
+            return false;
+        }
+
+        return Directory.Exists(Path.Combine(path, "SPT_Runtime"));
+    }
+
     public bool IsPrefixPathValid(string path)
     {
-        return !string.IsNullOrEmpty(path) && Directory.Exists(path) && File.Exists(Path.Combine(path, "system.reg"));
+        if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path) || !Path.IsPathRooted(path))
+        {
+            return false;
+        }
+
+        return File.Exists(Path.Combine(path, "system.reg"));
     }
 
     public bool IsUmuPathValid(string path)
     {
-        return !string.IsNullOrEmpty(path) && File.Exists(path) && Path.GetFileName(path) == "umu-run";
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path) || !Path.IsPathRooted(path))
+        {
+            return false;
+        }
+
+        return Path.GetFileName(path) == "umu-run";
     }
 
     public bool IsProtonVersionValid(string path)
     {
-        return !string.IsNullOrEmpty(path) && Directory.Exists(path);
+        if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path) || path.Contains("LegacyRuntime"))
+        {
+            return false;
+        }
+
+        return File.Exists(Path.Combine(path, "compatibilitytool.vdf"));
     }
 }

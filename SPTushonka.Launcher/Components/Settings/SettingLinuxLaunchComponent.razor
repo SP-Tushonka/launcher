@@ -1,10 +1,9 @@
-@inject ConfigHelper ConfigHelper
-@inject LocaleHelper LocaleHelper
+@inherits SettingComponentBase
 
 <MudContainer Class="pa-0">
     <MudLink Color="Color.Default" Underline="Underline.None" Disabled="Disabled" Class="@(GetLinkClasses())">
         <MudTextField @bind-Value="NewValue" Label="@(LocaleHelper.Get("linux_launch_settings"))" Variant="Variant.Outlined" Immediate="true" Margin="Margin.Dense" Placeholder="MANGOHUD=1"/>
-        <MudIconButton Color="@(NewValue == OldValue ? Color.Default : Color.Success)" Icon="@Icons.Material.Filled.Save" Disabled="@(NewValue == OldValue)" OnClick="OnTextSaved" />
+        <MudIconButton Color="@(IsSaved ? Color.Default : Color.Success)" Icon="@Icons.Material.Filled.Save" Disabled="@(IsSaved)" OnClick="OnTextSaved" />
     </MudLink>
 </MudContainer>
 @if (AddDiv)
@@ -13,44 +12,24 @@
 }
 
 @code {
-    // TODO: Add validation to this
 
-    protected override Task OnInitializedAsync()
+    // Compared against the config rather than a cached copy, so the button cant claim unsaved edits that arent there.
+    private bool IsSaved => NewValue == ConfigHelper.GetConfig().LinuxSettings.LaunchSettings;
+
+    protected override async Task OnInitializedAsync()
     {
-        OldValue = ConfigHelper.GetConfig().LinuxSettings.LaunchSettings;
-        NewValue = $"{OldValue}";
+        NewValue = ConfigHelper.GetConfig().LinuxSettings.LaunchSettings;
 
-        return base.OnInitializedAsync();
+        await base.OnInitializedAsync();
     }
-
-    private string GetLinkClasses()
-    {
-        var classes = new CssBuilder()
-            .AddClass("d-flex")
-            .AddClass("justify-center")
-            .AddClass("align-center")
-            .AddClass("py-2")
-            .AddClass("pl-5");
-
-        if (!Disabled)
-        {
-            classes.AddClass("cursor-pointer").AddClass("setting-on-hover");
-        }
-
-        return classes.Build();
-    }
-
-    private string OldValue { get; set; } = "";
-    private string NewValue { get; set; } = "";
-
-    [Parameter] public bool Disabled { get; set; }
-
-    [Parameter] public bool AddDiv { get; set; }
 
     private void OnTextSaved()
     {
-        OldValue = NewValue;
-        ConfigHelper.SetLinuxLaunchSettings(NewValue);
-        StateHasChanged();
+        if (!IsSaved)
+        {
+            ConfigHelper.SetLinuxLaunchSettings(NewValue);
+            StateHasChanged();
+        }
     }
+
 }

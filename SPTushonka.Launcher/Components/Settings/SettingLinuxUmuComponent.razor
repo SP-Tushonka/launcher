@@ -1,15 +1,15 @@
-@inject ConfigHelper ConfigHelper
-@inject LocaleHelper LocaleHelper
-@inject ISnackbar Snackbar
+@inherits SettingComponentBase
 
 <MudContainer Class="pa-0">
     <MudLink Color="Color.Default" Underline="Underline.None" Disabled="Disabled" Class="@(GetLinkClasses())">
-        <MudTextField @bind-Value="NewValue" Label="@(LocaleHelper.Get("linux_add_umu"))"
+        <MudTextField T="string" Value="@NewValue"
+                    ValueChanged="@OnNewValueChanged"
+                    Label="@(LocaleHelper.Get("linux_add_umu"))"
                     Variant="Variant.Outlined" Immediate="true"
                     Margin="Margin.Dense" Adornment="Adornment.End"
                     AdornmentIcon="@Icons.Material.Filled.Folder"
-                    AdornmentColor="Color.Info" OnAdornmentClick="SetUmuPath"
-                    Error="@(!IsSaved || HasError)"
+                    AdornmentColor="Color.Info" OnAdornmentClick="SetFilePath"
+                    Error="@(HasError)"
                     ErrorText="@(LocaleHelper.Get("setting_help_umu"))"/>
         <MudIconButton Color="@(IsSaved ? Color.Default : Color.Success)" Icon="@Icons.Material.Filled.Save"
                     Disabled="IsSaved" OnClick="Save"/>
@@ -21,73 +21,34 @@
 }
 
 @code {
-    [Parameter]
-    public bool Disabled { get; set; }
-
-    [Parameter]
-    public bool AddDiv { get; set; }
-
-    private string NewValue { get; set; } = "";
-
-    private bool HasError => !ConfigHelper.IsUmuPathValid(NewValue);
 
     // Compared against the config rather than a cached copy, so the button cant claim unsaved edits that arent there.
     private bool IsSaved => NewValue == ConfigHelper.GetConfig().LinuxSettings.UmuPath;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         NewValue = ConfigHelper.GetConfig().LinuxSettings.UmuPath;
 
         if (string.IsNullOrWhiteSpace(NewValue))
         {
             NewValue = ConfigHelper.TryDetectUmuPath();
-            ConfigHelper.SetLinuxUmuPath(NewValue);
+            await SaveValue();
         }
 
-        base.OnInitialized();
+        HasError = !ValidateValue();
+
+        await base.OnInitializedAsync();
     }
 
-    private string GetLinkClasses()
+    protected override async Task SaveValue()
     {
-        var classes = new CssBuilder()
-            .AddClass("d-flex")
-            .AddClass("justify-center")
-            .AddClass("align-center")
-            .AddClass("py-2")
-            .AddClass("pl-5");
-
-        if (!Disabled)
-        {
-            classes.AddClass("cursor-pointer").AddClass("setting-on-hover");
-        }
-
-        return classes.Build();
-    }
-
-    private async Task SetUmuPath()
-    {
-        // umu-run is a file, a folder dialog cant select it
-        var file = await Launcher.App.MainWindow.ShowOpenFileAsync(title: "Choose umu-run", defaultPath: FilePickerHelper.StartDirectory(NewValue));
-
-        // no file was selected
-        if (!file.Any())
-        {
-            return;
-        }
-
-        NewValue = file.FirstOrDefault()!;
-        Save();
-    }
-
-    private void Save()
-    {
-        if (HasError)
-        {
-            Snackbar.Add(LocaleHelper.Get("setting_save_path_error_1"), Severity.Error);
-            return;
-        }
-
         ConfigHelper.SetLinuxUmuPath(NewValue);
-        StateHasChanged();
+        HasError = !ValidateValue();
     }
+
+    protected override bool ValidateValue()
+    {
+        return ConfigHelper.IsUmuPathValid(NewValue);
+    }
+
 }
