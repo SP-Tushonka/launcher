@@ -13,14 +13,23 @@ public class LinuxClipboard : IClipboard
     public bool CopyText(string value)
     {
         var sessionType = GetSessionType();
+        var command = string.Empty;
+
+        if (sessionType is not ("x11" or "wayland"))
+        {
+            throw new Exception($"Your window manager \"{sessionType}\" is not supported.");
+        }
+
+        value = value.Replace("\\", "\\\\").Replace("\"", "\\\"");      // Escapes on top of escapes
 
         if (sessionType == "x11")
-            return CopyTextX11(value);
-        
-        if (sessionType == "wayland")
-            return CopyTextWayland(value);
+            command = $"printf %b \"{value}\" | xclip -selection clipboard";
 
-        throw new Exception($"Your window manager \"{sessionType}\" is not supported.");
+        if (sessionType == "wayland")
+            command = $"wl-copy \"{value}\"";
+
+        var process = LinuxHelper.ExecuteCommand(command);
+        return process.ExitCode == 0;
     }
 
     // Check whether the user is using X11 or Wayland
@@ -28,19 +37,5 @@ public class LinuxClipboard : IClipboard
     {
         var process = LinuxHelper.ExecuteCommand("echo $XDG_SESSION_TYPE");
         return process.StandardOutput.ReadToEnd().Trim();
-    }
-
-    private bool CopyTextX11(string value)
-    {
-        value = value.Replace("\\", "\\\\").Replace("\"", "\\\"");      // Escapes on top of escapes
-        var process = LinuxHelper.ExecuteCommand($"printf %b \"{value}\" | xclip -selection clipboard");
-        return process.ExitCode == 0;
-    }
-
-    private bool CopyTextWayland(string value)
-    {
-        value = value.Replace("\\", "\\\\").Replace("\"", "\\\"");      // Escapes on top of escapes
-        var process = LinuxHelper.ExecuteCommand($"wl-copy \"{value}\"");
-        return process.ExitCode == 0;
     }
 }
