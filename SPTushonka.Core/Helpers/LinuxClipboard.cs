@@ -39,10 +39,8 @@ public class LinuxClipboard : IClipboard
 
     private bool CopyTextWayland(string value)
     {
-        // TODO: Add wayland support with wl-copy, the alternative of xclip for wayland
-        // Sample implementation, HAS NOT BEEN TESTED
         value = value.Replace("\\", "\\\\").Replace("\"", "\\\"");      // Escapes on top of escapes
-        var process = LinuxHelper.ExecuteCommand($"printf %b \"{value}\" | wl-copy --primary");
+        var process = LinuxHelper.ExecuteCommand($"wl-copy \"{value}\"");
         return process.ExitCode == 0;
     }
 }
