@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace SPTarkov.Core.Helpers;
 
-public partial class WindowsClipboard(ILogger<WindowsClipboard> logger)
+public partial class WindowsClipboard(ILogger<WindowsClipboard> logger) : IClipboard
 {
     [LibraryImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]

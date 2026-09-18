@@ -233,4 +233,26 @@ public class LinuxHelper(ILogger<LinuxHelper> logger, ConfigHelper configHelper)
 
     [DllImport("libc", EntryPoint = "setenv", SetLastError = true)]
     public static extern int SetEnvironmentVariableNative(string name, string value, int overwrite);
+
+    /// <summary>
+    /// Use this whenever a Terminal command needs to be run
+    /// </summary>
+    public static Process ExecuteCommand(string command)
+    {
+        command = command.Replace("\\", "\\\\").Replace("\"", "\\\"");    // Escapes on top of escapes
+        var processInfo = new ProcessStartInfo("/usr/bin/sh", $"-c \"{command}\"")
+        {
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+    
+        Process? process = Process.Start(processInfo);
+        if (process == null)
+            throw new Exception("Process is null.");
+
+        process.WaitForExit();
+
+        return process;
+    }
 }
