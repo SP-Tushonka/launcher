@@ -12,7 +12,7 @@ public class LinuxClipboard : IClipboard
     
     public bool CopyText(string value)
     {
-        var sessionType = GetSessionType();
+        var sessionType = Environment.GetEnvironmentVariable("XDG_SESSION_TYPE");   // Check whether the user is using X11 or Wayland
         var command = string.Empty;
 
         if (sessionType is not ("x11" or "wayland"))
@@ -30,12 +30,5 @@ public class LinuxClipboard : IClipboard
 
         var process = LinuxHelper.ExecuteCommand(command);
         return process.ExitCode == 0;
-    }
-
-    // Check whether the user is using X11 or Wayland
-    private static string GetSessionType()
-    {
-        var process = LinuxHelper.ExecuteCommand("echo $XDG_SESSION_TYPE");
-        return process.StandardOutput.ReadToEnd().Trim();
     }
 }

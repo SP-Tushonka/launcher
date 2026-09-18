@@ -234,7 +234,9 @@ public class LinuxHelper(ILogger<LinuxHelper> logger, ConfigHelper configHelper)
     [DllImport("libc", EntryPoint = "setenv", SetLastError = true)]
     public static extern int SetEnvironmentVariableNative(string name, string value, int overwrite);
 
-    // Use this whenever a Terminal command needs to be run
+    /// <summary>
+    /// Use this whenever a Terminal command needs to be run
+    /// </summary>
     public static Process ExecuteCommand(string command)
     {
         command = command.Replace("\\", "\\\\").Replace("\"", "\\\"");    // Escapes on top of escapes
