@@ -17,6 +17,8 @@ public class Paths
         Path.Join("/", "usr", "share", "steam", "compatibilitytools.d")
     };
 
+    public static readonly string ModCache = Path.Join(_runtimeRoot, "user", "Launcher", "ModCache");
+    public static readonly string SevenZip = Path.Join(_runtimeRoot, "SPT_Data", "Launcher", "Dependency");
     public static readonly string PatchPath = Path.Join(_runtimeRoot, "SPT_Data", "Launcher", "Patches");
     public static readonly string CoreDllPath = Path.Join("BepInEx", "plugins", "spt", "spt-core.dll");
     public static readonly string HwechoDllPath = Path.Join("EscapeFromTarkov_Data", "Plugins", "x86_64", "hwecho.dll");
@@ -30,7 +32,16 @@ public class Paths
     public static readonly string LogsFolder = Path.Join(_runtimeRoot, "user", "logs");
     public static readonly string LauncherLog = Path.Join(_runtimeRoot, "user", "logs", "Launcher.log");
     public static readonly string ProfilesFolder = Path.Join(_runtimeRoot, "user", "profiles");
-    
+
+    public static readonly HashSet<string> ArchiveFileInfoToIgnore = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "BepInEx",
+        Path.Join("BepInEx", "plugins"),
+        "SPT_Runtime",
+        Path.Join("SPT_Runtime", "user"),
+        Path.Join("SPT_Runtime", "user", "mods"),
+    };
+
     public static string BundleCacheFolder(string gamePath)
     {
         return Path.Join(gamePath, "SPT_Runtime", "user", "cache", "bundles");

@@ -7,7 +7,9 @@ using MudBlazor.Services;
 using Photino.Blazor;
 using SPTarkov.Core.Configuration;
 using SPTarkov.Core.Extensions;
+using SPTarkov.Core.Forge;
 using SPTarkov.Core.Helpers;
+using SPTarkov.Core.Mods;
 using SPTarkov.Core.Patching;
 using SPTarkov.Launcher.Helpers;
 using SPTarkov.Launcher.Platform;
@@ -81,6 +83,9 @@ public class Launcher
             .Services.AddSingleton<ConfigHelper>()
             .AddSingleton<GameHelper>()
             .AddSingleton<HttpHelper>()
+            .AddSingleton<ForgeRateLimiter>()
+            .AddSingleton<ModManager>()
+            .AddSingleton<ModHelper>()
             .AddSingleton<BundleHelper>()
             .AddSingleton<StateHelper>()
             .AddSingleton<TitleHelper>()
