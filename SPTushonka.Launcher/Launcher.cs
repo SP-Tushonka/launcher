@@ -11,6 +11,7 @@ using SPTarkov.Core.Forge;
 using SPTarkov.Core.Helpers;
 using SPTarkov.Core.Mods;
 using SPTarkov.Core.Patching;
+using SPTarkov.Core.SevenZip;
 using SPTarkov.Launcher.Helpers;
 using SPTarkov.Launcher.Platform;
 
@@ -79,6 +80,20 @@ public class Launcher
         EmbedProvider = new ManifestEmbeddedFileProvider(typeof(Launcher).Assembly, "wwwroot");
         var appBuilder = PhotinoBlazorAppBuilder.CreateDefault(EmbedProvider, args);
 
+        SevenZip? sevenZip = null;
+        if (OperatingSystem.IsWindows())
+        {
+            sevenZip = new WindowsSevenZip();
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+            sevenZip = new LinuxSevenZip();
+        }
+        if (sevenZip == null)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
         appBuilder
             .Services.AddSingleton<ConfigHelper>()
             .AddSingleton<GameHelper>()
@@ -96,6 +111,7 @@ public class Launcher
             .AddSingleton<WindowsClipboard>()
             .AddSingleton<LinuxHelper>()
             .AddSingleton<BrowserBridge>()
+            .AddSingleton(sevenZip)
             .AddLogging(builder =>
             {
                 builder.ClearProviders();
