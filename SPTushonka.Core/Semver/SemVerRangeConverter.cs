@@ -9,7 +9,11 @@ public class SemVerRangeConverter : JsonConverter<Range>
     public override Range? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         var stringValue = reader.GetString();
-        return Range.Parse(stringValue);
+        if (Range.TryParse(stringValue, out var value))
+        {
+            return value;
+        }
+        return null;
     }
 
     public override void Write(Utf8JsonWriter writer, Range value, JsonSerializerOptions options)
