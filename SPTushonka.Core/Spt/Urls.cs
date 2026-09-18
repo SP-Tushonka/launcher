@@ -16,11 +16,11 @@ public class Urls
     public const string Bundles = "/singleplayer/bundles";
     public const string BundleFile = "/files/bundle/";
 
-    public const string ForgeMods = "https://forge.sp-tarkov.com/api/v0/mods";
-    public const string ForgeUpdate = "https://forge.sp-tarkov.com/api/v0/mods/updates";
-    public const string ForgeMod = "https://forge.sp-tarkov.com/api/v0/mod";
-    public const string ForgeAddons = "https://forge.sp-tarkov.com/api/v0/addons";
-    public const string ForgeAddonDetails = "https://forge.sp-tarkov.com/api/v0/addon";
-    public const string ForgeCategories = "https://forge.sp-tarkov.com/api/v0/mod-categories";
-    public const string ForgePing = "https://forge.sp-tarkov.com/api/v0/ping";
+    public const string ForgeMods = "https://sp-mod.com/api/v0/mods";
+    public const string ForgeUpdate = "https://sp-mod.com/api/v0/mods/updates";
+    public const string ForgeMod = "https://sp-mod.com/api/v0/mod";
+    public const string ForgeAddons = "https://sp-mod.com/api/v0/addons";
+    public const string ForgeAddonDetails = "https://sp-mod.com/api/v0/addon";
+    public const string ForgeCategories = "https://sp-mod.com/api/v0/mod-categories";
+    public const string ForgePing = "https://sp-mod.com/api/v0/ping";
 }
