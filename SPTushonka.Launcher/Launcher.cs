@@ -88,7 +88,6 @@ public class Launcher
             .AddSingleton<SessionHelper>()
             .AddSingleton<LocaleHelper>()
             .AddSingleton<FilePatcher>()
-            .AddSingleton<WindowsClipboard>()
             .AddSingleton<LinuxHelper>()
             .AddSingleton<BrowserBridge>()
             .AddLogging(builder =>
@@ -107,6 +106,11 @@ public class Launcher
                 config.SnackbarConfiguration.ShowTransitionDuration = _showTransitionDuration;
                 config.SnackbarConfiguration.HideTransitionDuration = _hideTransitionDuration;
             });
+
+        if (OperatingSystem.IsWindows())
+            appBuilder.Services.AddSingleton<IClipboard, WindowsClipboard>();
+        if (OperatingSystem.IsLinux())
+            appBuilder.Services.AddSingleton<IClipboard, LinuxClipboard>();
 
         appBuilder.RootComponents.Add<App>("app");
 

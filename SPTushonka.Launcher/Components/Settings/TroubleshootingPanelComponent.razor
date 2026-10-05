@@ -3,7 +3,7 @@
 @inject StateHelper StateHelper
 @inject ISnackbar Snackbar
 @inject LocaleHelper LocaleHelper
-@inject WindowsClipboard Clipboard
+@inject IClipboard Clipboard
 
 <SettingsSectionComponent Title="@(LocaleHelper.Get("setting_section_troubleshooting"))">
     <SettingSwitchComponent Switch="@DebugLogging" OptionName="@(LocaleHelper.Get("setting_debug_logging"))" SwitchFunc="SetDebugLogging"/>
