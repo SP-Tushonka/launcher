@@ -1,8 +1,9 @@
-﻿@inject ConfigHelper ConfigHelper
+@inject ConfigHelper ConfigHelper
 @inject LocaleHelper LocaleHelper
 
 <SettingsSectionComponent Title="@(LocaleHelper.Get("setting_section_window"))">
-    <SettingSwitchComponent Switch="@CloseToTraySwitch" OptionName="@(LocaleHelper.Get("setting_close"))" SwitchFunc="SetCloseToTray" Disabled="!IsWindows || CloseOnGameStartSwitch"/>
+    <SettingSwitchComponent Switch="@CloseToTraySwitch" OptionName="Hide in the tray when closing the window" SwitchFunc="SetCloseToTray" Disabled="!IsWindows || CloseOnGameStartSwitch"/>
+    <MudText Typo="Typo.body2" Class="px-5 pb-2">When on, the window’s X button hides the launcher and leaves the server running. Exit closes the launcher and stops a local server it started. If a game is running, it continues and the server stops after the game exits. A server you started yourself is left running.</MudText>
     <SettingSwitchComponent Switch="@MinimizeOnLaunchSwitch" OptionName="@(LocaleHelper.Get("setting_minimize"))" SwitchFunc="SetMinimizeOnLaunch"/>
     <SettingSwitchComponent Switch="@CloseOnGameStartSwitch" OptionName="@(LocaleHelper.Get("setting_close_on_game_start"))" SwitchFunc="SetCloseOnGameStart"/>
     <SettingSwitchComponent Switch="@AlwaysOnTopSwitch" OptionName="@(LocaleHelper.Get("setting_always_top"))" SwitchFunc="SetAlwaysOnTop" Disabled="!IsWindows"/>

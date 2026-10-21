@@ -8,6 +8,8 @@
 @inject SessionHelper SessionHelper
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
+@inject SPTarkov.Core.Runtime.OfflineRuntime OfflineRuntime
+@inject ILogger<Home> Logger
 
 <MudContainer Class="px-4 my-2" MaxWidth="MaxWidth.Large">
     @if (_connecting)
@@ -64,6 +66,24 @@
         }
 
         await base.OnInitializedAsync();
+        _connecting = true;
+        var startupServer = ConfigHelper.GetStartupServer();
+        _connectingText = "Connecting to " + startupServer.Name + "…";
+        try
+        {
+            await OfflineRuntime.EnsureBackendOnStartupAsync(ConfigHelper.GetConfig().StartLocalServerAutomatically, CancellationToken.None, startupServer.IpAddress, startupServer.CertificateSha256);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Startup local server connection failed");
+            Snackbar.PersistentError(startupServer.ServerId != Server.LocalServerId
+                ? "The server could not be connected. Select Connect to retry or review its certificate. Details are in the launcher log."
+                : ConfigHelper.GetConfig().StartLocalServerAutomatically
+                ? "The local server could not be started or connected. Try Connect again. Details are in the launcher log."
+                : "Start the local server, then select Connect. Automatic server startup is off in Settings.", Severity.Warning);
+            return;
+        }
+        finally { StopConnecting(); }
         await TryAutoConnect();
     }
 
@@ -80,6 +100,11 @@
         StateHelper.AutoConnectAttempted = true;
 
         var preferred = config.PreferredProfile;
+        if (preferred.ServerId != ConfigHelper.GetStartupServer().ServerId)
+        {
+            Snackbar.Add("Your saved profile belongs to another server. Select that server to connect.", Severity.Info);
+            return;
+        }
 
         // The preferred server must still exist in the saved list.
         var server = ConfigHelper.GetServers().FirstOrDefault(s => s.ServerId == preferred.ServerId);
@@ -100,7 +125,7 @@
         {
             StateHelper.LogoutAndDispose();
             StopConnecting();
-            Snackbar.Add(LocaleHelper.Get("auto_connect_failed"), Severity.Error);
+            Snackbar.PersistentError(connectResult.ErrorMessage ?? LocaleHelper.Get("auto_connect_failed"));
             return;
         }
 
@@ -125,7 +150,7 @@
         {
             StateHelper.LogoutAndDispose();
             StopConnecting();
-            Snackbar.Add(LocaleHelper.Get("auto_connect_failed"), Severity.Error);
+            Snackbar.PersistentError(LocaleHelper.Get("auto_connect_failed"));
             return;
         }
 

@@ -12,6 +12,8 @@ public record Server
 
     public string ServerId { get; set; } = string.Empty;
 
+    public string? CertificateSha256 { get; set; }
+
     [JsonIgnore]
     public bool Locked
     {

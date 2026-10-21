@@ -1,0 +1,53 @@
+@using SPTarkov.Core.Connections
+@inject IConnectionRestrictionService ConnectionRestrictionService
+
+<MudTooltip Color="Color.Dark" Arrow="false" Placement="Placement.Bottom"
+            Text="Prevents the game client from connecting to anything except your SPT server.">
+    <SettingSwitchComponent Switch="@Controller.Enabled"
+                            OptionName="Restrict game connections"
+                            Disabled="@(Controller.Busy || !Controller.Available || !Controller.Verified)"
+                            SwitchFunc="Toggle" />
+</MudTooltip>
+<MudText Typo="Typo.caption" Class="pl-5 pr-2 pb-2">
+    Windows administrator approval may be required to enable or disable this option.
+</MudText>
+@if (Controller.Busy)
+{
+    <MudText Typo="Typo.caption" Class="pl-5 pr-2 pb-2" role="status">Verifying connection protection…</MudText>
+}
+else if (!Controller.Verified)
+{
+    <MudAlert Severity="Severity.Warning" Dense="true" Class="mx-5 mb-2" role="status">
+        Protection status has not been verified.
+        @Controller.Message
+    </MudAlert>
+    <MudButton OnClick="CheckWithApproval" Size="Size.Small" Class="ml-5 mb-2">Check protection</MudButton>
+}
+else if (!string.IsNullOrEmpty(Controller.Message))
+{
+    <MudAlert Severity="Severity.Info" Dense="true" Class="mx-5 mb-2" role="status">@Controller.Message</MudAlert>
+}
+
+@code {
+    private ConnectionRestrictionController Controller = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Controller = new(ConnectionRestrictionService);
+        await Controller.RefreshAsync();
+    }
+
+    private async Task Toggle()
+    {
+        var operation = Controller.ToggleAsync();
+        StateHasChanged();
+        await operation;
+    }
+
+    private async Task CheckWithApproval()
+    {
+        var operation = Controller.VerifyWithApprovalAsync();
+        StateHasChanged();
+        await operation;
+    }
+}

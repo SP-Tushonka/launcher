@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Microsoft.Extensions.Logging;
 
 namespace SPTarkov.Core.Logging;
@@ -27,6 +27,11 @@ public class FileLogger(string name, string path, SemaphoreSlim locker) : ILogge
             _sb.Clear();
             _sb.Append($"[{name}] ");
             _sb.Append(formatter(state, exception));
+            if (exception is not null)
+            {
+                _sb.Append(Environment.NewLine);
+                _sb.Append(exception.ToString());
+            }
             _sb.Append(Environment.NewLine);
             await File.AppendAllTextAsync(path, _sb.ToString(), Encoding.UTF8);
         }

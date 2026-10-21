@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
@@ -133,7 +133,7 @@ public class GameHelper
         // Start game
         var args =
             $"-force-gfx-jobs native -token={_stateHelper.SelectedProfile?.ProfileId} -config="
-            + $"{{'BackendUrl':'https://{_stateHelper.SelectedServer?.IpAddress}','Version':'live','MatchingVersion':'live'}}";
+            + $"{{'BackendUrl':'{SPTarkov.Core.Runtime.ServerEndpoint.Normalize(_stateHelper.SelectedServer?.IpAddress ?? string.Empty)}','Version':'live','MatchingVersion':'live'}}";
 
         _logger.LogInformation("args: {Args}", args);
 
@@ -166,7 +166,7 @@ public class GameHelper
             "-force-gfx-jobs",
             "native",
             $"-token={_stateHelper.SelectedProfile?.ProfileId}",
-            $"-config={{'BackendUrl':'https://{_stateHelper.SelectedServer?.IpAddress}','Version':'live','MatchingVersion':'live'}}",
+            $"-config={{'BackendUrl':'{SPTarkov.Core.Runtime.ServerEndpoint.Normalize(_stateHelper.SelectedServer?.IpAddress ?? string.Empty)}','Version':'live','MatchingVersion':'live'}}",
         ];
 
         _logger.LogInformation("args: {Args}", string.Join(" ", argsList));

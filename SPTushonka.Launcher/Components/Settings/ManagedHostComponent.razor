@@ -1,0 +1,32 @@
+@inject ConfigHelper ConfigHelper
+@inject SPTarkov.Core.Runtime.OfflineRuntime OfflineRuntime
+
+<SettingSwitchComponent Switch="@Enabled"
+                        OptionName="Enable BepInEx mod support"
+                        Disabled="@(!Enabled && !CanEnable)"
+                        SwitchFunc="Toggle" />
+<MudText Typo="Typo.caption" Class="pl-5 pr-2 pb-2">
+    Applies to the next Play. The BepInEx host and game window were tested; individual mods still need compatibility testing.
+</MudText>
+@if (OfflineRuntime.ManagedHostCapability is null)
+{
+    <MudText Typo="Typo.caption" Class="pl-5 pr-2 pb-2" role="status">Connect to the local server to verify mod support. You can always turn this option off.</MudText>
+}
+else if (!CanEnable)
+{
+    <MudText Typo="Typo.caption" Class="pl-5 pr-2 pb-2" role="status">Finish game cleanup, verify server settings, and reconnect if needed before enabling mod support. You can always turn this option off.</MudText>
+}
+
+@code {
+    private bool Enabled => ConfigHelper.GetConfig().EnableManagedHost;
+    private bool CanEnable => OfflineRuntime.ManagedHostCapability is not null &&
+        !OfflineRuntime.RecoveryRequired && !OfflineRuntime.EnvironmentChangeUncertain && !OfflineRuntime.IdleLeaseLost;
+
+    private Task Toggle()
+    {
+        // Recheck at the handler boundary: a previously rendered switch is not authority to enable the host.
+        if (Enabled) ConfigHelper.SetEnableManagedHost(false);
+        else if (CanEnable) ConfigHelper.SetEnableManagedHost(true);
+        return Task.CompletedTask;
+    }
+}

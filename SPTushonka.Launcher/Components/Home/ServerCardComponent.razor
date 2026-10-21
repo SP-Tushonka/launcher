@@ -4,6 +4,9 @@
 @inject ConfigHelper ConfigHelper
 @inject LocaleHelper LocaleHelper
 @inject HttpHelper HttpHelper
+@inject SPTarkov.Core.Runtime.OfflineRuntime OfflineRuntime
+@inject ISnackbar Snackbar
+@inject ILogger<ServerCardComponent> Logger
 @implements IDisposable
 
 <MudItem md="4">
@@ -101,7 +104,11 @@
         using var probeCts = CancellationTokenSource.CreateLinkedTokenSource(token);
         probeCts.CancelAfter(StatusProbeTimeout);
 
-        var online = await HttpHelper.PingServerAsync(Server.IpAddress, probeCts.Token);
+        var pin = Server.CertificateSha256;
+        if (pin is null && SPTarkov.Core.Runtime.ServerEndpoint.IsValid(Server.IpAddress) &&
+            SPTarkov.Core.Runtime.ServerEndpoint.Normalize(Server.IpAddress) == OfflineRuntime.BoundBackendUrl)
+            pin = OfflineRuntime.VerifiedBackendTlsSha256;
+        var online = await HttpHelper.PingServerAsync(Server.IpAddress, probeCts.Token, pin);
         _status = online ? ServerStatus.Online : ServerStatus.Offline;
 
         try
@@ -142,29 +149,28 @@
 
     private async Task RunEditTask()
     {
-        if (StateHelper.SelectedServer?.ServerId == Server.ServerId)
-        {
-            StateHelper.LogoutAndDispose();
-        }
-
         var param = new DialogParameters
         {
             {
-                "Server", Server
+                "Server", Server with { }
             }
         };
 
         var dialog = await DialogService.ShowAsync<ServerEditDialog>("ServerEditDialog", param, ConfigHelper.DialogOptions);
         var result = await dialog.Result;
 
-        if (result?.Canceled is false)
+        if (result?.Canceled is false && result.Data is Server edited)
         {
+            var oldValid = SPTarkov.Core.Runtime.ServerEndpoint.IsValid(Server.IpAddress);
+            var endpointChanged = !oldValid || SPTarkov.Core.Runtime.ServerEndpoint.Normalize(Server.IpAddress) != edited.IpAddress || Server.CertificateSha256 != edited.CertificateSha256;
+            if (endpointChanged && oldValid && OfflineRuntime.BoundBackendUrl == SPTarkov.Core.Runtime.ServerEndpoint.Normalize(Server.IpAddress) && !await ConfirmDisconnect()) return;
             var serverToChange = ServerList.FirstOrDefault(x => x.ServerId == Server.ServerId);
 
             if (serverToChange != null)
             {
-                serverToChange.Name = Server.Name;
-                serverToChange.IpAddress = Server.IpAddress;
+                serverToChange.Name = edited.Name;
+                serverToChange.IpAddress = edited.IpAddress;
+                serverToChange.CertificateSha256 = edited.CertificateSha256;
             }
 
             ConfigHelper.SetServers(ServerList);
@@ -174,6 +180,8 @@
 
     private async Task RunLoginTask()
     {
+        if (!SPTarkov.Core.Runtime.ServerEndpoint.IsValid(Server.IpAddress)) { Snackbar.Add("Edit this server and enter a valid hostname and port.", Severity.Warning); return; }
+        if (OfflineRuntime.RequiresServerDisconnect(Server.IpAddress, Server.CertificateSha256) && !await ConfirmDisconnect()) return;
         if (StateHelper.SelectedServer != null)
         {
             StateHelper.LogoutAndDispose();
@@ -191,7 +199,7 @@
 
         if (result?.Canceled is false)
         {
-            StateHelper.SetSelectedServer(Server);
+            ConfigHelper.SetStartupServerId(Server.ServerId);
             StateHelper.SetAllowServerPage(true);
 
             NavigationManager.NavigateTo("/Profiles");
@@ -200,11 +208,6 @@
 
     private async Task RunDeleteTask()
     {
-        if (StateHelper.SelectedServer != null)
-        {
-            StateHelper.LogoutAndDispose();
-        }
-
         var param = new DialogParameters
         {
             {
@@ -217,10 +220,29 @@
 
         if (result?.Canceled is false)
         {
+            if (SPTarkov.Core.Runtime.ServerEndpoint.IsValid(Server.IpAddress) && OfflineRuntime.BoundBackendUrl == SPTarkov.Core.Runtime.ServerEndpoint.Normalize(Server.IpAddress) && !await ConfirmDisconnect()) return;
             ServerList.Remove(Server);
             await ServerListChanged.InvokeAsync(ServerList);
 
             ConfigHelper.SetServers(ServerList);
+        }
+    }
+
+    private async Task<bool> ConfirmDisconnect()
+    {
+        var accepted = await DialogService.ShowMessageBoxAsync("Disconnect current server?", "Disconnect before changing the server address or trusted certificate.", yesText: "Disconnect", cancelText: "Cancel");
+        if (accepted != true) return false;
+        try
+        {
+            await OfflineRuntime.ReleaseAsync(_disposeCts.Token);
+            StateHelper.LogoutAndDispose();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Server change disconnect refused");
+            Snackbar.PersistentError("The server could not be disconnected. Finish the game or reload pending server settings, then try again.", Severity.Warning);
+            return false;
         }
     }
 

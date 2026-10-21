@@ -1,7 +1,11 @@
-﻿@page "/Profile"
+@page "/Profile"
+@implements IDisposable
+@using SPTarkov.Core.Runtime
 
 @inject StateHelper StateHelper
 @inject GameHelper GameHelper
+@inject SPTarkov.Core.Runtime.OfflineRuntime OfflineRuntime
+@inject SPTarkov.Core.Connections.IConnectionRestrictionService ConnectionRestrictionService
 @inject ILogger<Profile> Logger
 @inject NavigationManager NavigationManager
 @inject LocaleHelper LocaleHelper
@@ -11,6 +15,12 @@
 @inject IDialogService DialogService
 
 <MudContainer Class="px-4 my-2" MaxWidth="MaxWidth.Large">
+    @if (!string.IsNullOrEmpty(_runtimeStatus)) { <MudText role="status">@_runtimeStatus</MudText> }
+    @if (OfflineRuntime.RecoveryRequired && !_gameTaskActive)
+    {
+        <MudAlert Severity="Severity.Warning">Select Stop game and recover before changing profiles or starting again.</MudAlert>
+        <MudButton OnClick="RecoverGame" Disabled="@(_recovering || _environmentBusy || _wipeDialogActive || _exitingAfterStart || OfflineRuntime.EnvironmentChangeUncertain)" Variant="Variant.Filled" Color="Color.Warning">Stop game and recover</MudButton>
+    }
     <MudContainer Class="pa-0 mb-4 d-flex flex-row justify-space-between relative">
         <MudButton Class="mud-button-border-copy border-2 border-solid mud-button-inner-text-copy" Disabled="@_buttonDisabled" Variant="Variant.Filled" Color="Color.Dark" OnClick="ReturnToProfiles" StartIcon="@Icons.Material.Filled.ArrowBack" Size="Size.Medium" IconColor="Color.Error">@(LocaleHelper.Get("profile_logout"))</MudButton>
         <div class="profile-name-overlay d-flex flex-row align-center gap-2 no-pointers no-select">
@@ -26,6 +36,11 @@
         }
         <MudButton Class="@($"mud-button-border-copy border-2 border-solid mud-button-inner-text-copy{(CheckboxForWipe ? " danger-button" : "")}")" Disabled="@_buttonDisabled" Variant="Variant.Filled" Color="Color.Dark" OnClick="StartGameTask" EndIcon="@Icons.Material.Filled.ArrowForward" Size="Size.Medium" IconColor="@(CheckboxForWipe ? Color.Inherit : Color.Success)">@(CheckboxForWipe ? LocaleHelper.Get("profile_wipe_and_start") : LocaleHelper.Get("profile_start_game"))</MudButton>
     </MudContainer>
+    @if (OfflineRuntime.EnvironmentChangeUncertain)
+    {
+        <MudAlert Severity="Severity.Warning" Class="mb-2">Reload server settings to verify the previous change.</MudAlert>
+    }
+    <EventSettingsPanel Disabled="@_environmentPanelDisabled" BusyChanged="OnEnvironmentBusyChanged"/>
     <MudContainer Class="pa-0 mb-4 d-flex flex-row gap-4 justify-center">
         <ProfileCardComponent MiniProfile="SelectedMiniProfile" HideDeleteButton="true"/>
         <ProfileStatsComponent MiniProfile="SelectedMiniProfile"/>
@@ -60,10 +75,16 @@
 @code {
     private bool CheckboxForWipe { get; set; }
     private MiniProfile SelectedMiniProfile { get; set; } = default!;
-    private bool _buttonDisabled;
+    // Derive availability from every owner so one completed task cannot unlock another task's controls.
+    private bool _environmentPanelDisabled => _environmentBusy || _gameTaskActive || _recovering || _wipeDialogActive ||
+        _exitingAfterStart || OfflineRuntime.RecoveryRequired;
+    private bool _buttonDisabled => _environmentPanelDisabled || OfflineRuntime.EnvironmentChangeUncertain;
+    private bool _environmentBusy;
+    private bool _wipeDialogActive;
     private bool _exitingAfterStart;
+    private bool _gameTaskActive;
+    private bool _recovering;
 
-    private static readonly TimeSpan GameStartTimeout = TimeSpan.FromMinutes(2);
     private BundleProgress? BundleProgressState { get; set; }
     private bool ShowWipeCheckbox => !SelectedMiniProfile.Wipe;
 
@@ -72,6 +93,7 @@
 
     protected override void OnInitialized()
     {
+        Launcher.ExitCancelled += OnExitCancelled;
         if (StateHelper.SelectedProfile is null)
         {
             NavigationManager.NavigateTo("/ServerPageWrapper/false");
@@ -84,56 +106,113 @@
         base.OnInitialized();
     }
 
+    private void OnExitCancelled() => _ = InvokeAsync(() =>
+    {
+        _exitingAfterStart = false;
+        _runtimeStatus = string.Empty;
+        UpdateNavigationAvailability();
+        StateHasChanged();
+    });
+
+    public void Dispose() => Launcher.ExitCancelled -= OnExitCancelled;
+
     private async Task OnWipeCheckboxChanged(bool value)
     {
+        if (_buttonDisabled) return;
         if (!value)
         {
             CheckboxForWipe = false;
             return;
         }
 
-        var dialogParams = new DialogParameters
+        _wipeDialogActive = true;
+        UpdateNavigationAvailability();
+        try
         {
-            {
-                "MiniProfile", SelectedMiniProfile
-            }
-        };
-
-        var dialog = await DialogService.ShowAsync<ProfileWipeDialog>(LocaleHelper.Get("profile_wipe_confirm_title"), dialogParams, ConfigHelper.DialogOptions);
-        var result = await dialog.Result;
-
-        CheckboxForWipe = result?.Canceled is false;
-        StateHasChanged();
+            var dialogParams = new DialogParameters { { "MiniProfile", SelectedMiniProfile } };
+            var dialog = await DialogService.ShowAsync<ProfileWipeDialog>(LocaleHelper.Get("profile_wipe_confirm_title"), dialogParams, ConfigHelper.DialogOptions);
+            var result = await dialog.Result;
+            if (!_environmentBusy && !_gameTaskActive && !_recovering && !_exitingAfterStart &&
+                !OfflineRuntime.RecoveryRequired && !OfflineRuntime.EnvironmentChangeUncertain)
+                CheckboxForWipe = result?.Canceled is false;
+        }
+        finally
+        {
+            _wipeDialogActive = false;
+            UpdateNavigationAvailability();
+            StateHasChanged();
+        }
     }
+
+    private Task OnEnvironmentBusyChanged(bool busy)
+    {
+        // Check synchronously before the child starts IPC, including events queued before a disabled render.
+        if (busy && (_gameTaskActive || _recovering || _wipeDialogActive || _exitingAfterStart || OfflineRuntime.RecoveryRequired))
+            throw new InvalidOperationException("Finish the current profile operation before changing server settings.");
+        _environmentBusy = busy;
+        UpdateNavigationAvailability();
+        return Task.CompletedTask;
+    }
+
+    private void UpdateNavigationAvailability() => StateHelper.SetAllowNavigation(!_buttonDisabled);
 
     /// <summary>
     /// Wrap the StartGame method to easily control navigation.
     /// </summary>
     private async Task StartGameTask()
     {
-        _buttonDisabled = true;
-        StateHelper.SetAllowNavigation(false);
+        if (_buttonDisabled) return;
+        _gameTaskActive = true;
+        UpdateNavigationAvailability();
 
-        await StartGame();
-
-        if (_exitingAfterStart)
+        try
         {
-            return;
+            await StartGame();
+            if (!_exitingAfterStart && !OfflineRuntime.RecoveryRequired) await RefreshProfiles();
         }
-
-        await RefreshProfiles();
-
-        CheckboxForWipe = false;
-
-        _buttonDisabled = false;
-
-        // This is currently not working on Linux - Photino Bug
-        if (ConfigHelper.GetConfig().MinimizeOnLaunch)
+        catch (Exception ex)
         {
-            Launcher.App.MainWindow.SetMinimized(false);
+            Logger.LogError(ex, "Offline Play failed");
+            Snackbar.PersistentError(RuntimeUserMessages.Starting(OfflineRuntime.RecoveryRequired));
         }
+        finally
+        {
+            _gameTaskActive = false;
+            if (!_exitingAfterStart)
+            {
+                _runtimeStatus = string.Empty;
+                BundleProgressState = null;
+                CheckboxForWipe = false;
+                if (ConfigHelper.GetConfig().MinimizeOnLaunch)
+                    Launcher.App.MainWindow.SetMinimized(false);
+            }
+            UpdateNavigationAvailability();
+        }
+    }
 
-        StateHelper.SetAllowNavigation(true);
+    private async Task RecoverGame()
+    {
+        if (_environmentBusy || _gameTaskActive || _recovering || _wipeDialogActive || _exitingAfterStart ||
+            OfflineRuntime.EnvironmentChangeUncertain || !OfflineRuntime.RecoveryRequired) return;
+        _recovering = true;
+        UpdateNavigationAvailability();
+        _runtimeStatus = "Stopping game and verifying cleanup…";
+        try
+        {
+            await OfflineRuntime.StopAsync(CancellationToken.None);
+            await RefreshProfiles();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Offline game recovery failed");
+            Snackbar.PersistentError(RuntimeUserMessages.RecoveryFailed);
+        }
+        finally
+        {
+            _recovering = false;
+            _runtimeStatus = string.Empty;
+            UpdateNavigationAvailability();
+        }
     }
 
     private async Task RefreshProfiles()
@@ -222,13 +301,27 @@
         }
     }
 
+    private string _runtimeStatus = string.Empty;
+
     private async Task StartGame()
     {
-        Snackbar.Add(LocaleHelper.Get("profile_page_task_1"));
-        if (!await GameHelper.CheckGame())
+        var profileId = SelectedMiniProfile.ProfileId;
+        var requireGameConnections = ConfigHelper.GetConfig().RequireGameConnections;
+        var enableManagedHost = ConfigHelper.GetConfig().EnableManagedHost;
+        try
         {
-            var message = GameHelper.ErrorMessage;
-            Snackbar.Add($"{LocaleHelper.Get("profile_page_task_1_fail")}: {message}", Severity.Error);
+            if (requireGameConnections)
+            {
+                var connections = await ConnectionRestrictionService.ReadAsync(CancellationToken.None);
+                if (!connections.Available || !connections.Enabled)
+                    throw new InvalidOperationException(connections.Message ?? "Required game connection protection is not verified. Check Game settings before Play.");
+            }
+            await OfflineRuntime.PreflightAsync(ConfigHelper.GetGamePath(), CancellationToken.None, enableManagedHost: enableManagedHost);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Offline Play preflight refused");
+            Snackbar.PersistentError(RuntimeUserMessages.PreparationFailed);
             return;
         }
 
@@ -236,22 +329,14 @@
         if (CheckboxForWipe && !await WipeProfile())
         {
             var message = GameHelper.ErrorMessage;
-            Snackbar.Add($"{LocaleHelper.Get("profile_unable_wipe")}: {message}", Severity.Error);
+            Snackbar.PersistentError($"{LocaleHelper.Get("profile_unable_wipe")}: {message}");
             return;
         }
 
         if (ConfigHelper.GetConfig().ClearCacheOnLaunch && !await ClearCache())
         {
             var message = GameHelper.ErrorMessage;
-            Snackbar.Add($"{LocaleHelper.Get("profile_unable_clear")}: {message}", Severity.Error);
-            return;
-        }
-
-        Snackbar.Add(LocaleHelper.Get("profile_page_task_2"));
-        if (!await GameHelper.PatchGame())
-        {
-            var message = GameHelper.ErrorMessage;
-            Snackbar.Add($"{LocaleHelper.Get("profile_page_task_2_fail")}: {message}", Severity.Error);
+            Snackbar.PersistentError($"{LocaleHelper.Get("profile_unable_clear")}: {message}");
             return;
         }
 
@@ -271,16 +356,22 @@
         if (!bundlesAcquired)
         {
             var message = GameHelper.ErrorMessage;
-            Snackbar.Add($"{LocaleHelper.Get("profile_page_task_4_fail")}: {message}", Severity.Error);
+            Snackbar.PersistentError($"{LocaleHelper.Get("profile_page_task_4_fail")}: {message}");
             return;
         }
 
         Snackbar.Add(LocaleHelper.Get("profile_page_task_3"));
 
-        if (!GameHelper.LaunchGame())
+        try
         {
-            var message = GameHelper.ErrorMessage;
-            Snackbar.Add($"{LocaleHelper.Get("profile_page_task_3_fail")}: {message}", Severity.Error);
+            await OfflineRuntime.LaunchWithRecoveryAsync(profileId,
+                ConfigHelper.GetGamePath(), CancellationToken.None,
+                new Progress<string>(message => { _runtimeStatus = message; _ = InvokeAsync(StateHasChanged); }), requireGameConnections: requireGameConnections, enableManagedHost: enableManagedHost);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Game start failed");
+            Snackbar.PersistentError(RuntimeUserMessages.Starting(OfflineRuntime.RecoveryRequired));
             return;
         }
 
@@ -292,35 +383,31 @@
 
         if (ConfigHelper.GetConfig().CloseOnGameStart)
         {
-            if (await GameHelper.WaitForGameRunning(GameStartTimeout, CancellationToken.None))
-            {
-                _exitingAfterStart = true;
-                Launcher.RequestExit();
-                return;
-            }
-
-            Snackbar.Add(LocaleHelper.Get("profile_page_close_on_start_fail"), Severity.Warning);
+            // The independent runtime retains the game/backend lease after this UI exits.
+            _exitingAfterStart = true;
+            Launcher.RequestExit();
+            return;
         }
-
-        if (ConfigHelper.GetConfig().MinimizeOnLaunch)
+        if (ConfigHelper.GetConfig().MinimizeOnLaunch) Launcher.App.MainWindow.SetMinimized(true);
+        try { await OfflineRuntime.MonitorAsync(CancellationToken.None); }
+        catch (Exception ex)
         {
-            Launcher.App.MainWindow.SetMinimized(true);
-        }
-
-        if (!await GameHelper.MonitorGame())
-        {
-            Snackbar.Add(LocaleHelper.Get("profile_page_game_closed"), Severity.Info);
+            Logger.LogError(ex, "Game monitoring failed");
+            Snackbar.PersistentError(RuntimeUserMessages.MonitoringFailed);
         }
     }
 
     private void ReturnToProfiles()
     {
+        if (_buttonDisabled) return;
         StateHelper.SetSelectedProfile(null);
         NavigationManager.NavigateTo("/ServerPageWrapper/false");
     }
 
     private async Task<bool> WipeProfile()
     {
+        if (_environmentBusy || _recovering || _wipeDialogActive || _exitingAfterStart ||
+            OfflineRuntime.RecoveryRequired || OfflineRuntime.EnvironmentChangeUncertain) return false;
         Snackbar.Add(LocaleHelper.Get("profile_wipe"));
         var token = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         try

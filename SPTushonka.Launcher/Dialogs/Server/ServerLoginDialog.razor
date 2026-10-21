@@ -2,6 +2,10 @@
 @inject StateHelper StateHelper
 @inject SessionHelper SessionHelper
 @inject LocaleHelper LocaleHelper
+@inject ConfigHelper ConfigHelper
+@inject IDialogService DialogService
+@inject SPTarkov.Core.Runtime.OfflineRuntime OfflineRuntime
+@inject ILogger<ServerLoginDialog> Logger
 
 <MudDialog Class="mud-background-gray border-2 border-solid mud-border-lines-default">
     <DialogContent>
@@ -46,6 +50,27 @@
         });
 
         var result = await SessionHelper.ConnectToServerAsync(Server, progress, Token.Token);
+        if (result.CertificateChallenge is { } challenge && !UserCancel)
+        {
+            var accepted = await DialogService.ShowMessageBoxAsync("Trust server certificate?",
+                $"Server: {challenge.BackendUrl}\nSHA-256: {challenge.Fingerprint}\n" +
+                (Server.CertificateSha256 is not null ? "This differs from the saved certificate. " : "") +
+                "Compare this fingerprint with the server computer before trusting it.", yesText: "Trust certificate", cancelText: "Cancel");
+            if (accepted != true || UserCancel) { AbortOrFail("The certificate was not trusted. No profile connection was made."); return; }
+            try
+            {
+                if (OfflineRuntime.BoundBackendUrl is not null) await OfflineRuntime.ReleaseAsync(Token.Token);
+                ConfigHelper.SetServerCertificate(Server.ServerId, challenge.BackendUrl, challenge.Fingerprint);
+                Server = Server with { CertificateSha256 = challenge.Fingerprint };
+                result = await SessionHelper.ConnectToServerAsync(Server, progress, Token.Token);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Certificate approval connection failed");
+                AbortOrFail("The server could not be connected. Disconnect first if a game or server settings change is still active, then try Connect again.");
+                return;
+            }
+        }
 
         if (result.Success)
         {
@@ -61,6 +86,7 @@
     {
         return step switch
         {
+            ConnectStep.Runtime => "Connecting to server…",
             ConnectStep.Ping => LocaleHelper.Get("server_login_task_1"),
             ConnectStep.Profiles => LocaleHelper.Get("server_login_task_2"),
             ConnectStep.Types => LocaleHelper.Get("server_login_task_3"),
@@ -71,6 +97,7 @@
 
     private string MapFailure(ConnectResult result)
     {
+        if (result.ErrorMessage is not null) return result.ErrorMessage;
         if (result.TimedOut)
         {
             return LocaleHelper.Get("request_timed_out");
@@ -91,7 +118,7 @@
 
         if (!UserCancel)
         {
-            Snackbar.Add(message, Severity.Error);
+            Snackbar.PersistentError(message);
         }
 
         StateHelper.LogoutAndDispose();

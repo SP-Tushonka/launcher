@@ -1,10 +1,13 @@
-﻿@page "/Profiles"
+@page "/Profiles"
 
 @inject IDialogService DialogService
 @inject StateHelper StateHelper
 @inject ConfigHelper ConfigHelper
 @inject NavigationManager NavigationManager
 @inject LocaleHelper LocaleHelper
+@inject SPTarkov.Core.Runtime.OfflineRuntime OfflineRuntime
+@inject ISnackbar Snackbar
+@inject ILogger<Profiles> Logger
 
 <MudContainer Class="px-4 my-2" MaxWidth="MaxWidth.Large">
     <MudContainer Class="pa-0 d-flex justify-start gap-2 pb-4">
@@ -94,13 +97,22 @@
         }
     }
 
-    private Task ReturnToServers()
+    private async Task ReturnToServers()
     {
-        StateHelper.SetSelectedServer(null);
-        StateHelper.SetAllowServerPage(false);
-        NavigationManager.NavigateTo("/ServerPageWrapper/false");
-
-        return Task.CompletedTask;
+        StateHelper.SetAllowNavigation(false);
+        try
+        {
+            await OfflineRuntime.ReleaseAsync(CancellationToken.None);
+            StateHelper.LogoutAndDispose();
+            StateHelper.SetAllowServerPage(false);
+            NavigationManager.NavigateTo("/ServerPageWrapper/false");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Local server disconnect failed");
+            Snackbar.PersistentError("The local server could not be disconnected. Close the game if it is open, then try Disconnect again. Details are in the launcher log.");
+        }
+        finally { StateHelper.SetAllowNavigation(true); }
     }
 
 }

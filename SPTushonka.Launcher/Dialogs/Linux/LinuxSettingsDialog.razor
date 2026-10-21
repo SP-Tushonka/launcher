@@ -44,7 +44,7 @@
     {
         if (HasError)
         {
-            Snackbar.Add(LocaleHelper.Get("setting_confirm_error_1"), Severity.Error);
+            Snackbar.PersistentError(LocaleHelper.Get("setting_confirm_error_1"));
             return;
         }
 

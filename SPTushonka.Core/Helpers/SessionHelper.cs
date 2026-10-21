@@ -9,6 +9,7 @@ namespace SPTarkov.Core.Helpers;
 public enum ConnectStep
 {
     None,
+    Runtime,
     Ping,
     Profiles,
     Types,
@@ -21,24 +22,33 @@ public record ConnectResult
     public bool Success { get; init; }
     public ConnectStep FailedStep { get; init; } = ConnectStep.None;
     public bool TimedOut { get; init; }
+    public string? ErrorMessage { get; init; }
+    public SPTarkov.Core.Runtime.ServerCertificateTrustException? CertificateChallenge { get; init; }
 
     public static ConnectResult Ok()
     {
         return new ConnectResult { Success = true };
     }
 
-    public static ConnectResult Fail(ConnectStep step, bool timedOut = false)
+    public static ConnectResult Fail(ConnectStep step, bool timedOut = false, string? errorMessage = null)
     {
         return new ConnectResult
         {
             Success = false,
             FailedStep = step,
             TimedOut = timedOut,
+            ErrorMessage = errorMessage,
         };
     }
 }
 
-public class SessionHelper(ILogger<SessionHelper> logger, HttpHelper httpHelper, StateHelper stateHelper)
+public class SessionHelper(
+    ILogger<SessionHelper> logger,
+    HttpHelper httpHelper,
+    StateHelper stateHelper,
+    SPTarkov.Core.Runtime.OfflineRuntime runtime,
+    ConfigHelper? configHelper = null
+)
 {
     private static readonly TimeSpan _requestTimeout = TimeSpan.FromSeconds(10);
 
@@ -53,12 +63,22 @@ public class SessionHelper(ILogger<SessionHelper> logger, HttpHelper httpHelper,
         CancellationToken cancellationToken = default
     )
     {
-        stateHelper.SetSelectedServer(server);
         stateHelper.ModPages = [];
 
-        var step = ConnectStep.Ping;
+        var step = ConnectStep.Runtime;
         try
         {
+            progress?.Report(ConnectStep.Runtime);
+            var selected = server with { IpAddress = SPTarkov.Core.Runtime.ServerEndpoint.Normalize(server.IpAddress) };
+            await runtime.EnsureBackendAsync(
+                selected.IpAddress,
+                cancellationToken,
+                configHelper?.GetConfig().StartLocalServerAutomatically ?? true,
+                selected.CertificateSha256
+            );
+            stateHelper.SetSelectedServer(selected, runtime.VerifiedBackendTlsSha256);
+            configHelper?.SetStartupServerId(server.ServerId);
+            step = ConnectStep.Ping;
             progress?.Report(ConnectStep.Ping);
             using (var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
             {
@@ -76,7 +96,9 @@ public class SessionHelper(ILogger<SessionHelper> logger, HttpHelper httpHelper,
             {
                 cts.CancelAfter(_requestTimeout);
                 var profiles = await httpHelper.GameServerGet<SPTProfilesResponse>(Urls.Profiles, cts.Token);
-                stateHelper.ProfileList = profiles?.Response!;
+                if (profiles?.Response is null)
+                    return ConnectResult.Fail(ConnectStep.Profiles);
+                stateHelper.ProfileList = profiles.Response;
             }
 
             step = ConnectStep.Types;
@@ -85,7 +107,9 @@ public class SessionHelper(ILogger<SessionHelper> logger, HttpHelper httpHelper,
             {
                 cts.CancelAfter(_requestTimeout);
                 var types = await httpHelper.GameServerGet<SPTTypesResponse>(Urls.Types, cts.Token);
-                stateHelper.ProfileTypes = types?.Response!;
+                if (types?.Response is null)
+                    return ConnectResult.Fail(ConnectStep.Types);
+                stateHelper.ProfileTypes = types.Response;
             }
 
             step = ConnectStep.ModPages;
@@ -96,6 +120,16 @@ public class SessionHelper(ILogger<SessionHelper> logger, HttpHelper httpHelper,
                 var modPages = await httpHelper.GameServerGet<SPTModPagesResponse>(Urls.ModPages, cts.Token);
                 stateHelper.ModPages = modPages?.Response ?? [];
             }
+        }
+        catch (SPTarkov.Core.Runtime.ServerCertificateTrustException ex)
+        {
+            logger.LogWarning(ex, "Server certificate approval required");
+            return new ConnectResult
+            {
+                FailedStep = ConnectStep.Runtime,
+                CertificateChallenge = ex,
+                ErrorMessage = ex.Message,
+            };
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
@@ -110,7 +144,10 @@ public class SessionHelper(ILogger<SessionHelper> logger, HttpHelper httpHelper,
         catch (Exception ex)
         {
             logger.LogWarning(ex, "ConnectToServerAsync failed at step {Step}", step);
-            return ConnectResult.Fail(step);
+            return ConnectResult.Fail(
+                step,
+                errorMessage: "Could not connect to the selected server. Try Connect again. Details are in the launcher log."
+            );
         }
 
         return ConnectResult.Ok();

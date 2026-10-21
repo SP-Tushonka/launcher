@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../SPTushonka.Core/SPTushonka.Core.csproj" />
+    <Reference Include="zlib.net">
+      <HintPath>../../SPTushonka.Core/SharedDependencies/zlib.net.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

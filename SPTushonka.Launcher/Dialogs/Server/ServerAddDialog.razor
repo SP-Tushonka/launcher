@@ -15,7 +15,7 @@
 
             <MudForm Model="_server" Class="gap-3">
                 <MudTextField Immediate="true" @bind-Value="_server.Name" Label="@(LocaleHelper.Get("server_add_name"))" HelperText="@(LocaleHelper.Get("server_add_name_help"))" ShrinkLabel="true" Required="true" RequiredError="@(LocaleHelper.Get("server_edit_required_name"))" Variant="Variant.Outlined" Margin="Margin.Dense" OnKeyDown="SubmitOnEnter"/>
-                <MudTextField Immediate="true" @bind-Value="_server.IpAddress" Label="@(LocaleHelper.Get("server_add_address"))" HelperText="@(LocaleHelper.Get("server_add_address_help"))" ShrinkLabel="true" Placeholder="127.0.0.1:6969" Required="true" RequiredError="@(LocaleHelper.Get("server_add_required"))" Variant="Variant.Outlined" Margin="Margin.Dense" OnKeyDown="SubmitOnEnter"/>
+                <MudTextField Immediate="true" @bind-Value="_server.IpAddress" Label="@(LocaleHelper.Get("server_add_address"))" HelperText="Hostname and port, such as server.example:6969. HTTPS only, without paths." ShrinkLabel="true" Placeholder="127.0.0.1:6969" Required="true" RequiredError="@(LocaleHelper.Get("server_add_required"))" Variant="Variant.Outlined" Margin="Margin.Dense" OnKeyDown="SubmitOnEnter"/>
             </MudForm>
 
             <div class="mt-2 d-flex justify-end gap-2">
@@ -31,7 +31,7 @@
 
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
 
-    private bool CanSubmit => !string.IsNullOrWhiteSpace(_server.Name) && !string.IsNullOrWhiteSpace(_server.IpAddress);
+    private bool CanSubmit => !string.IsNullOrWhiteSpace(_server.Name) && SPTarkov.Core.Runtime.ServerEndpoint.IsValid(_server.IpAddress);
 
     // Matches the tint the server card icon gets in the listing.
     private string ServerIconStyle => $"color: {ModPageVisual.GetColor($"{_server.Name}|{_server.IpAddress}")};";
@@ -48,8 +48,7 @@
     {
         _server.ServerId = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
-        _server.IpAddress = _server.IpAddress.Replace("https://", "");
-        _server.IpAddress = _server.IpAddress.Trim();
+        _server.IpAddress = SPTarkov.Core.Runtime.ServerEndpoint.Normalize(_server.IpAddress);
 
         Snackbar.Add(LocaleHelper.Get("server_add_success"), Severity.Success);
         MudDialog.Close(DialogResult.Ok(_server));

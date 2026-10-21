@@ -1,4 +1,4 @@
-﻿@inject ISnackbar Snackbar
+@inject ISnackbar Snackbar
 @inject StateHelper StateHelper
 @inject HttpHelper HttpHelper
 @inject LocaleHelper LocaleHelper
@@ -133,7 +133,7 @@
 
         if (!UserCancel)
         {
-            Snackbar.Add(message, Severity.Error);
+            Snackbar.PersistentError(message);
         }
 
         Token.Cancel();

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../SPTushonka.Launcher/Connections/GameConnectionHost.cs" Link="GameConnectionHost.cs" />
+    <Compile Include="../../SPTushonka.Launcher/Connections/GameConnectionBroker.cs" Link="GameConnectionBroker.cs" />
+    <Compile Include="../../SPTushonka.Launcher/Connections/ProtectionSessionState.cs" Link="ProtectionSessionState.cs" />
+    <Compile Include="../../SPTushonka.Launcher/Connections/ProtectionSessionHost.cs" Link="ProtectionSessionHost.cs" />
+  </ItemGroup>
+</Project>

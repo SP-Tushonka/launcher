@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
@@ -27,6 +27,9 @@ public class Launcher
     private static ILogger<Launcher> _logger = null!;
     private static TrayHelper _trayHelper = null!;
     private static bool _exitRequested;
+    private static bool _runtimeExitPending;
+    private static bool _runtimeExitComplete;
+    public static event Action? ExitCancelled;
     private static string? _trayIconPath;
     private static SingleInstanceGuard _singleInstanceGuard = null!;
     private static readonly string TemporaryFilesPath = Path.Join(Path.GetTempPath(), "SPT.Launcher");
@@ -64,6 +67,13 @@ public class Launcher
     [STAThread]
     private static void Main(string[] args)
     {
+        if (OperatingSystem.IsWindows())
+            SPTarkov.Launcher.Connections.GameConnectionBroker.CaptureCodeIdentity();
+        if (SPTarkov.Launcher.Connections.GameConnectionHost.TryHandle(args, out var connectionExitCode))
+        {
+            Environment.ExitCode = connectionExitCode;
+            return;
+        }
         SetNvidiaLinuxEnv();
 
         // Single-instance guard scoped to install location.
@@ -79,12 +89,17 @@ public class Launcher
 
         appBuilder
             .Services.AddSingleton<ConfigHelper>()
+            .AddSingleton<
+                SPTarkov.Core.Connections.IConnectionRestrictionService,
+                SPTarkov.Launcher.Connections.ConnectionRestrictionService
+            >()
             .AddSingleton<GameHelper>()
             .AddSingleton<HttpHelper>()
             .AddSingleton<BundleHelper>()
             .AddSingleton<StateHelper>()
             .AddSingleton<TitleHelper>()
             .AddSingleton<TrayHelper>()
+            .AddSingleton<SPTarkov.Core.Runtime.OfflineRuntime>()
             .AddSingleton<SessionHelper>()
             .AddSingleton<LocaleHelper>()
             .AddSingleton<FilePatcher>()
@@ -201,7 +216,7 @@ public class Launcher
         App.MainWindow.ContextMenuEnabled = true;
 #endif
         App.MainWindow.Topmost = ConfigHelper.GetConfig().AlwaysTop;
-        App.MainWindow.MinHeight = 560;
+        App.MainWindow.MinHeight = 740;
         App.MainWindow.MinWidth = 1070;
 
         // Changing monitors ends up breaking position restore for some users, so we are going to skip that
@@ -211,12 +226,12 @@ public class Launcher
         if (ConfigHelper.GetConfig().FirstRun)
         {
             App.MainWindow.Width = 1070;
-            App.MainWindow.Height = 560;
+            App.MainWindow.Height = 740;
         }
         else
         {
             App.MainWindow.Width = ConfigHelper.GetConfig().StartSize.Width;
-            App.MainWindow.Height = ConfigHelper.GetConfig().StartSize.Height;
+            App.MainWindow.Height = Math.Max(740, ConfigHelper.GetConfig().StartSize.Height);
         }
 
         App.MainWindow.RegisterWindowClosingHandler(OnExit);
@@ -234,12 +249,52 @@ public class Launcher
         }
 
         // Close To Tray. Hide the window instead of exiting.
-        if (!_exitRequested && OperatingSystem.IsWindows() && ConfigHelper.GetConfig().CloseToTray)
+        if (
+            !_runtimeExitComplete
+            && !_runtimeExitPending
+            && !_exitRequested
+            && OperatingSystem.IsWindows()
+            && ConfigHelper.GetConfig().CloseToTray
+        )
         {
             HideToTray();
             return true;
         }
 
+        if (!_runtimeExitComplete)
+        {
+            if (!_runtimeExitPending)
+            {
+                _runtimeExitPending = true;
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+                        await App.Services.GetRequiredService<SPTarkov.Core.Runtime.OfflineRuntime>().ReleaseIfIdleAsync(timeout.Token);
+                        _runtimeExitComplete = true;
+                        App.MainWindow.Invoke(() => App.MainWindow.Close());
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Server shutdown could not be confirmed during launcher exit");
+                        if (OperatingSystem.IsWindows())
+                            SurfaceMainWindow();
+                        App.MainWindow.Invoke(() =>
+                        {
+                            _runtimeExitPending = false;
+                            _exitRequested = false;
+                            ExitCancelled?.Invoke();
+                            App.MainWindow.ShowMessage(
+                                "Could not close launcher",
+                                "Server shutdown could not be confirmed. Leave the launcher open, then try Exit again. If a server settings change is pending, reload Server settings first."
+                            );
+                        });
+                    }
+                });
+            }
+            return true;
+        }
         return false;
     }
 

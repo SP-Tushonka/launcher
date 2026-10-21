@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
   <Import Project="../Build.props" />
 
   <PropertyGroup>
@@ -25,6 +25,23 @@
   <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
     <AssemblyName>SPT.Launcher.Linux</AssemblyName>
   </PropertyGroup>
+
+  <!-- Product publishing is explicit and never runs the stock ../Build cleanup. -->
+  <PropertyGroup Condition="'$(ProductRelease)' == 'true' and '$(ProductReleaseOutput)' != ''">
+    <PublishDir>$(ProductReleaseOutput)/</PublishDir>
+  </PropertyGroup>
+  <Target Name="ValidateProductRelease" BeforeTargets="PrepareForBuild" Condition="'$(ProductRelease)' == 'true'">
+    <Error Condition="'$(ProductReleaseOutput)' == ''" Text="ProductReleaseOutput must name a fresh absolute product output directory." />
+    <Error
+      Condition="'$(ProductReleaseOutput)' != '' and !$([System.IO.Path]::IsPathFullyQualified('$(ProductReleaseOutput)'))"
+      Text="ProductReleaseOutput must be absolute."
+    />
+    <Error Condition="'$(RuntimeIdentifier)' != 'win-x64'" Text="The supported product release target is win-x64." />
+    <Error
+      Condition="Exists('$(ProductReleaseOutput)')"
+      Text="ProductReleaseOutput already exists. Choose a fresh output; product publishing never clears an existing directory."
+    />
+  </Target>
 
   <!-- Copies MudBlazor's static assets from the NuGet package: the stylesheet to wwwroot/css/ and the script to wwwroot/js/ -->
   <!-- If once built, you find the launcher looks broken, its probably because these didnt exist first -->
@@ -53,7 +70,7 @@
     <Copy SourceFiles="@(SptData);" DestinationFolder="$(ProjectDir)$(OutDir)SPT_Data/%(RecursiveDir)" />
   </Target>
 
-  <Target Name="SPTBuildEvent" AfterTargets="Publish">
+  <Target Name="SPTBuildEvent" AfterTargets="Publish" Condition="'$(ProductRelease)' != 'true'">
     <RemoveDir Directories="$(ProjectDir)../Build" />
     <MakeDir Directories="$(ProjectDir)../Build" />
     <!-- Windows -->
@@ -69,5 +86,14 @@
       DestinationFolder="$(ProjectDir)../Build"
     />
     <Copy SourceFiles="@(SptData)" DestinationFiles="@(SptData->'$(ProjectDir)../Build/SPT_Data/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+  <Target Name="CopyProductReleaseData" AfterTargets="Publish" Condition="'$(ProductRelease)' == 'true'">
+    <ItemGroup>
+      <SptProductLocale Include="$(ProjectDir)../SPTushonka.Core/SPT_Data/Launcher/Locales/**/*.*" />
+    </ItemGroup>
+    <Copy
+      SourceFiles="@(SptProductLocale)"
+      DestinationFiles="@(SptProductLocale->'$(PublishDir)SPT_Data/Launcher/Locales/%(RecursiveDir)%(Filename)%(Extension)')"
+    />
   </Target>
 </Project>

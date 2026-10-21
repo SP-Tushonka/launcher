@@ -15,8 +15,13 @@
 
             <MudForm Model="Server" Class="gap-3">
                 <MudTextField Immediate="true" @bind-Value="Server.Name" Label="@(LocaleHelper.Get("server_edit_name"))" HelperText="@(LocaleHelper.Get("server_add_name_help"))" ShrinkLabel="true" Required="true" RequiredError="@(LocaleHelper.Get("server_edit_required_name"))" Variant="Variant.Outlined" Margin="Margin.Dense" OnKeyDown="SubmitOnEnter"/>
-                <MudTextField Immediate="true" @bind-Value="Server.IpAddress" Label="@(LocaleHelper.Get("server_edit_address"))" HelperText="@(LocaleHelper.Get("server_add_address_help"))" ShrinkLabel="true" Placeholder="127.0.0.1:6969" Required="true" RequiredError="@(LocaleHelper.Get("server_edit_required"))" Variant="Variant.Outlined" Margin="Margin.Dense" OnKeyDown="SubmitOnEnter"/>
+                <MudTextField Immediate="true" @bind-Value="Server.IpAddress" Label="@(LocaleHelper.Get("server_edit_address"))" HelperText="Hostname and port, such as server.example:6969. HTTPS only, without paths." ShrinkLabel="true" Placeholder="127.0.0.1:6969" Required="true" RequiredError="@(LocaleHelper.Get("server_edit_required"))" Variant="Variant.Outlined" Margin="Margin.Dense" OnKeyDown="SubmitOnEnter"/>
             </MudForm>
+            @if (Server.CertificateSha256 is not null)
+            {
+                <MudText Typo="Typo.caption">Trusted certificate: @Server.CertificateSha256</MudText>
+                <MudButton OnClick="ClearCertificate" Variant="Variant.Outlined">Clear trusted certificate</MudButton>
+            }
 
             <div class="mt-2 d-flex justify-end gap-2">
                 <MudButton Class="mud-button-border-copy border-2 border-solid mud-button-inner-text-copy" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!CanSubmit)" OnClick="Submit">@(LocaleHelper.Get("server_edit_confirm"))</MudButton>
@@ -33,7 +38,14 @@
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = default!;
 
-    private bool CanSubmit => !string.IsNullOrWhiteSpace(Server.Name) && !string.IsNullOrWhiteSpace(Server.IpAddress);
+    private bool CanSubmit => !string.IsNullOrWhiteSpace(Server.Name) && SPTarkov.Core.Runtime.ServerEndpoint.IsValid(Server.IpAddress);
+    private string _originalAddress = "";
+    protected override void OnInitialized()
+    {
+        Server = Server with { };
+        _originalAddress = SPTarkov.Core.Runtime.ServerEndpoint.IsValid(Server.IpAddress) ? SPTarkov.Core.Runtime.ServerEndpoint.Normalize(Server.IpAddress) : Server.IpAddress;
+    }
+    private void ClearCertificate() => Server.CertificateSha256 = null;
 
     // Matches the tint the server card icon gets in the listing.
     private string ServerIconStyle => $"color: {ModPageVisual.GetColor($"{Server.Name}|{Server.IpAddress}")};";
@@ -48,8 +60,8 @@
 
     private void Submit()
     {
-        Server.IpAddress = Server.IpAddress.Replace("https://", "");
-        Server.IpAddress = Server.IpAddress.Trim();
+        Server.IpAddress = SPTarkov.Core.Runtime.ServerEndpoint.Normalize(Server.IpAddress);
+        if (Server.IpAddress != _originalAddress) Server.CertificateSha256 = null;
 
         Snackbar.Add(LocaleHelper.Get("server_edit_success"), Severity.Success);
         MudDialog.Close(DialogResult.Ok(Server));

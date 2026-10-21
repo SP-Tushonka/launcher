@@ -104,7 +104,7 @@
 
         if (!UserCancel)
         {
-            Snackbar.Add(message, Severity.Error);
+            Snackbar.PersistentError(message);
         }
 
         Token.Cancel();

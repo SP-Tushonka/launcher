@@ -119,7 +119,7 @@ public abstract class SettingComponentBase : ComponentBase
 
         if (HasError)
         {
-            Snackbar.Add(LocaleHelper.Get("setting_save_path_error_1"), Severity.Error);
+            Snackbar.PersistentError(LocaleHelper.Get("setting_save_path_error_1"));
             return;
         }
 

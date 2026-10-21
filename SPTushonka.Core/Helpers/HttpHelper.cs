@@ -1,11 +1,16 @@
 using System.Net.Security;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
 using ComponentAce.Compression.Libs.zlib;
 using Microsoft.Extensions.Logging;
+using SPTarkov.Core.Runtime;
 using SPTarkov.Core.SPT;
 using SPTarkov.Core.SPT.Responses;
+
+[assembly: InternalsVisibleTo("SessionFixtures")]
 
 namespace SPTarkov.Core.Helpers;
 
@@ -16,39 +21,68 @@ public class HttpHelper
     private readonly StateHelper _stateHelper;
 
     public HttpHelper(ILogger<HttpHelper> logger, StateHelper stateHelper)
+        : this(logger, stateHelper, CreateHttpClient()) { }
+
+    // Internal injection keeps the public DI constructor unchanged and allows real wire-format fixtures without sockets.
+    internal HttpHelper(ILogger<HttpHelper> logger, StateHelper stateHelper, HttpClient httpClient)
     {
         _logger = logger;
         _stateHelper = stateHelper;
-
-        var handler = new HttpClientHandler();
-        handler.ServerCertificateCustomValidationCallback = CertificateValidationCallback;
-        handler.UseCookies = false;
-
-        _httpClient = new HttpClient(handler);
-        _httpClient.DefaultRequestVersion = new Version(3, 0);
-        _httpClient.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrLower;
+        _httpClient = httpClient;
     }
 
-    private static bool CertificateValidationCallback(
-        HttpRequestMessage httpRequestMessage,
-        X509Certificate2? x509Certificate2,
-        X509Chain? x509Chain,
-        SslPolicyErrors sslPolicyErrors
-    )
+    private static readonly HttpRequestOptionsKey<string> CertificatePin = new("ServerCertificateSha256");
+
+    private static HttpClient CreateHttpClient()
     {
-        return true;
+        var handler = new HttpClientHandler();
+        handler.AllowAutoRedirect = false;
+        handler.ServerCertificateCustomValidationCallback = (request, certificate, chain, errors) =>
+        {
+            request.Options.TryGetValue(CertificatePin, out var pin);
+            return ValidateServerCertificate(certificate, errors, pin);
+        };
+        handler.UseCookies = false;
+
+        return new HttpClient(handler)
+        {
+            DefaultRequestVersion = new Version(3, 0),
+            DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrLower,
+        };
+    }
+
+    internal static bool ValidateServerCertificate(X509Certificate2? certificate, SslPolicyErrors errors, string? pin) =>
+        pin is null
+            ? certificate is not null && errors == SslPolicyErrors.None
+            : certificate is not null
+                && ServerEndpoint.IsFingerprint(pin)
+                && Convert.ToHexStringLower(SHA256.HashData(certificate.RawData)) == pin;
+
+    private HttpRequestMessage GameRequest(HttpMethod method, string url)
+    {
+        var request = new HttpRequestMessage(method, BuildGameUrl(url));
+        if (_stateHelper.VerifiedBackendTlsSha256 is { } pin)
+            request.Options.Set(CertificatePin, pin);
+        return request;
     }
 
     private string BuildGameUrl(string url)
     {
-        return "https://" + _stateHelper.SelectedServer?.IpAddress + url;
+        var origin = ServerEndpoint.Normalize(_stateHelper.SelectedServer?.IpAddress ?? "");
+        if (!url.StartsWith('/') || url.StartsWith("//") || url.Contains('\\') || url.Any(char.IsControl))
+            throw new InvalidOperationException("The server returned an invalid request path.");
+        var target = new Uri(new Uri(origin), url);
+        if (ServerEndpoint.Normalize(target.GetLeftPart(UriPartial.Authority)) != origin)
+            throw new InvalidOperationException("The request must stay on the selected server.");
+        return target.AbsoluteUri;
     }
 
     public async Task<T?> GameServerGet<T>(string url, CancellationToken token)
     {
         _logger.LogDebug("Get: {Url}", url);
 
-        var task = await _httpClient.GetAsync(BuildGameUrl(url), token);
+        using var request = GameRequest(HttpMethod.Get, url);
+        using var task = await _httpClient.SendAsync(request, token);
         return JsonSerializer.Deserialize<T>(ReadJson(await task.Content.ReadAsByteArrayAsync(token)));
     }
 
@@ -56,11 +90,20 @@ public class HttpHelper
     /// Pings a specific server address, independent of the currently-selected server. Any failure (unreachable, bad response,
     /// cancellation) reads as offline.
     /// </summary>
-    public async Task<bool> PingServerAsync(string ipAddress, CancellationToken token)
+    public async Task<bool> PingServerAsync(string ipAddress, CancellationToken token, string? certificateSha256 = null)
     {
         try
         {
-            var response = await _httpClient.GetAsync("https://" + ipAddress + Urls.Ping, token);
+            using var request = new HttpRequestMessage(HttpMethod.Get, ServerEndpoint.Normalize(ipAddress) + Urls.Ping);
+            if (
+                certificateSha256 is null
+                && _stateHelper.SelectedServer is { } selected
+                && ServerEndpoint.Normalize(selected.IpAddress) == ServerEndpoint.Normalize(ipAddress)
+            )
+                certificateSha256 = _stateHelper.VerifiedBackendTlsSha256;
+            if (certificateSha256 is not null)
+                request.Options.Set(CertificatePin, certificateSha256);
+            using var response = await _httpClient.SendAsync(request, token);
             if (!response.IsSuccessStatusCode)
             {
                 return false;
@@ -101,7 +144,8 @@ public class HttpHelper
 
         try
         {
-            using var response = await _httpClient.GetAsync(BuildGameUrl(url), HttpCompletionOption.ResponseHeadersRead, token);
+            using var request = GameRequest(HttpMethod.Get, url);
+            using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
             response.EnsureSuccessStatusCode();
 
             var totalBytes = response.Content.Headers.ContentLength ?? -1;
@@ -142,7 +186,9 @@ public class HttpHelper
 
         var content = new ByteArrayContent(SimpleZlib.CompressToBytes(JsonSerializer.Serialize(request), zlibConst.Z_BEST_COMPRESSION));
 
-        var task = await _httpClient.PutAsync(BuildGameUrl(url), content, token);
+        using var message = GameRequest(HttpMethod.Put, url);
+        message.Content = content;
+        using var task = await _httpClient.SendAsync(message, token);
 
         return JsonSerializer.Deserialize<T>(ReadJson(await task.Content.ReadAsByteArrayAsync(token)));
     }

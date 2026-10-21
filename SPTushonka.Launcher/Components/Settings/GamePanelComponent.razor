@@ -2,19 +2,33 @@
 @inject LocaleHelper LocaleHelper
 
 <SettingsSectionComponent Title="@(LocaleHelper.Get("setting_section_game"))">
+    <MudSelect T="string" Label="Server to connect on startup" Value="_startupServerId" ValueChanged="SetStartupServer" Class="px-5" Variant="Variant.Outlined" Margin="Margin.Dense">
+        @foreach (var server in ConfigHelper.GetServers())
+        {
+            <MudSelectItem T="string" Value="@server.ServerId">@server.Name · @server.IpAddress</MudSelectItem>
+        }
+    </MudSelect>
+    <SettingSwitchComponent Switch="@StartLocalServerSwitch" OptionName="Start local server automatically" SwitchFunc="SetStartLocalServer"/>
+    <MudText Typo="Typo.body2" Class="px-5 pb-2">Add or edit server addresses on Home. A server on another computer is always connected without starting a local server. When automatic startup is off, start the selected server yourself before connecting.</MudText>
     <SettingSwitchComponent Switch="@AutoConnectSwitch" OptionName="@(LocaleHelper.Get("setting_auto_connect"))" SwitchFunc="SetAutoConnect"/>
     <SettingSwitchComponent Switch="@ClearCacheOnLaunchSwitch" OptionName="@(LocaleHelper.Get("setting_option_clear_cache"))" SwitchFunc="SetClearCacheOnLaunch"/>
+    <ConnectionRestrictionComponent/>
+    <ManagedHostComponent/>
     <SettingGamePath/>
 </SettingsSectionComponent>
 
 @code
 {
     private bool AutoConnectSwitch { get; set; }
+    private bool StartLocalServerSwitch { get; set; }
     private bool ClearCacheOnLaunchSwitch { get; set; }
+    private string _startupServerId = Server.LocalServerId;
 
     protected override void OnInitialized()
     {
         var settings = ConfigHelper.GetConfig();
+        _startupServerId = ConfigHelper.GetStartupServer().ServerId;
+        StartLocalServerSwitch = settings.StartLocalServerAutomatically;
         AutoConnectSwitch = settings.AutoConnectLastProfile;
         ClearCacheOnLaunchSwitch = settings.ClearCacheOnLaunch;
 
@@ -26,6 +40,21 @@
         AutoConnectSwitch = !AutoConnectSwitch;
         ConfigHelper.SetAutoConnectLastProfile(AutoConnectSwitch);
 
+        return Task.CompletedTask;
+    }
+
+    private Task SetStartLocalServer()
+    {
+        var enabled = !StartLocalServerSwitch;
+        ConfigHelper.SetStartLocalServerAutomatically(enabled);
+        StartLocalServerSwitch = enabled;
+        return Task.CompletedTask;
+    }
+
+    private Task SetStartupServer(string serverId)
+    {
+        ConfigHelper.SetStartupServerId(serverId);
+        _startupServerId = serverId;
         return Task.CompletedTask;
     }
 

@@ -1,0 +1,27 @@
+.event-heading,
+.event-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+}
+
+.event-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+    margin: 4px 0 8px;
+}
+
+.event-fields > * { min-width: 0; }
+.event-message { margin-top: 4px; }
+
+@media (max-width: 700px) {
+    .event-fields { grid-template-columns: minmax(0, 1fr); }
+}
+
+.event-season-fields { align-items: center; }
+.event-season-description { padding: 4px 0; }
+
+.event-actions { display: flex; flex-wrap: wrap; gap: 8px; }

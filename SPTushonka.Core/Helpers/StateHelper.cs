@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using SPTarkov.Core.Configuration;
 using SPTarkov.Core.SPT;
 
@@ -14,6 +14,7 @@ public class StateHelper(ILogger<StateHelper> logger)
     public List<ModPage> ModPages = [];
     public MiniProfile? SelectedProfile;
     public Server? SelectedServer;
+    public string? VerifiedBackendTlsSha256 { get; private set; }
 
     public bool AllowNavigation { get; set; } = true;
     public bool AllowServerPage { get; set; }
@@ -31,12 +32,14 @@ public class StateHelper(ILogger<StateHelper> logger)
         ModPages = [];
         SelectedProfile = null;
         SelectedServer = null;
+        VerifiedBackendTlsSha256 = null;
         ModPagesPanelOpen = false;
     }
 
-    public void SetSelectedServer(Server? server)
+    public void SetSelectedServer(Server? server, string? verifiedBackendTlsSha256 = null)
     {
-        SelectedServer = server;
+        SelectedServer = server is null ? null : server with { };
+        VerifiedBackendTlsSha256 = verifiedBackendTlsSha256;
     }
 
     public void SetSelectedProfile(MiniProfile? miniProfile)

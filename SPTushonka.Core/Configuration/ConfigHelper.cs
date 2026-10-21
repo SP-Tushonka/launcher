@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
@@ -318,6 +318,28 @@ public class ConfigHelper
         }
     }
 
+    public void SetRequireGameConnections(bool required)
+    {
+        lock (_lock)
+        {
+            if (_settings!.RequireGameConnections == required)
+                return;
+            _settings.RequireGameConnections = required;
+            SaveConfig();
+        }
+    }
+
+    public void SetEnableManagedHost(bool enabled)
+    {
+        lock (_lock)
+        {
+            if (_settings!.EnableManagedHost == enabled)
+                return;
+            _settings.EnableManagedHost = enabled;
+            SaveConfig();
+        }
+    }
+
     public void SetClearCacheOnLaunch(bool clearCacheOnLaunch)
     {
         lock (_lock)
@@ -354,6 +376,48 @@ public class ConfigHelper
         {
             _logger.LogDebug("SetAutoConnectLastProfile: {AutoConnectLastProfile}", autoConnectLastProfile);
             _settings!.AutoConnectLastProfile = autoConnectLastProfile;
+            SaveConfig();
+        }
+    }
+
+    public void SetStartLocalServerAutomatically(bool enabled)
+    {
+        lock (_lock)
+        {
+            if (_settings!.StartLocalServerAutomatically == enabled)
+                return;
+            _settings.StartLocalServerAutomatically = enabled;
+            SaveConfig();
+        }
+    }
+
+    public Server GetStartupServer() =>
+        GetServers().FirstOrDefault(server => server.ServerId == GetConfig().StartupServerId) ?? Server.Local;
+
+    public void SetStartupServerId(string serverId)
+    {
+        lock (_lock)
+        {
+            if (!GetServers().Any(server => server.ServerId == serverId))
+                throw new InvalidOperationException("Choose a saved server.");
+            _settings!.StartupServerId = serverId;
+            SaveConfig();
+        }
+    }
+
+    public void SetServerCertificate(string serverId, string backendUrl, string fingerprint)
+    {
+        lock (_lock)
+        {
+            var server =
+                _settings!.Servers.SingleOrDefault(item => item.ServerId == serverId)
+                ?? throw new InvalidOperationException("Save this server before trusting its certificate.");
+            if (
+                SPTarkov.Core.Runtime.ServerEndpoint.Normalize(server.IpAddress) != backendUrl
+                || !SPTarkov.Core.Runtime.ServerEndpoint.IsFingerprint(fingerprint)
+            )
+                throw new InvalidOperationException("The server changed while its certificate was being reviewed. Connect again.");
+            server.CertificateSha256 = fingerprint;
             SaveConfig();
         }
     }

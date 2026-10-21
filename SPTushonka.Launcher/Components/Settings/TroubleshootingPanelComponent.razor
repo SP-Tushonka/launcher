@@ -46,7 +46,7 @@
         if (!Directory.Exists(Paths.EftSettingsFolder))
         {
             Logger.LogWarning("Settings can not be loaded from live, path given: {EftSettingsFolder}", Paths.EftSettingsFolder);
-            Snackbar.Add(LocaleHelper.Get("setting_load_live_error_1"), Severity.Error);
+            Snackbar.PersistentError(LocaleHelper.Get("setting_load_live_error_1"));
             return;
         }
 
@@ -67,7 +67,7 @@
         catch (Exception e)
         {
             Logger.LogWarning("Unable to load live settings {Exception}", e);
-            Snackbar.Add(LocaleHelper.Get("setting_load_live_error_2"), Severity.Error);
+            Snackbar.PersistentError(LocaleHelper.Get("setting_load_live_error_2"));
             return;
         }
 
@@ -88,13 +88,13 @@
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
             Logger.LogError("Unable to clean game settings, UnauthorizedAccessException or IOException: {Exception}", e);
-            Snackbar.Add(LocaleHelper.Get("setting_clear_game_error_1"), Severity.Error);
+            Snackbar.PersistentError(LocaleHelper.Get("setting_clear_game_error_1"));
             return;
         }
         catch (Exception e)
         {
             Logger.LogError("Clearing game settings failed: {Exception}", e);
-            Snackbar.Add(LocaleHelper.Get("setting_clear_game_error_2"), Severity.Error);
+            Snackbar.PersistentError(LocaleHelper.Get("setting_clear_game_error_2"));
             return;
         }
 
@@ -118,7 +118,7 @@
         catch (Exception e)
         {
             Logger.LogError("Unable to clean temp files: {Exception}", e);
-            Snackbar.Add(LocaleHelper.Get("setting_clean_temp_error_2"), Severity.Error);
+            Snackbar.PersistentError(LocaleHelper.Get("setting_clean_temp_error_2"));
             return;
         }
 
@@ -179,7 +179,7 @@
         catch (Exception e)
         {
             Logger.LogError("Unable to set clipboard with logs: {Exception}", e);
-            Snackbar.Add(LocaleHelper.Get("setting_copy_logs_error_1"), Severity.Error);
+            Snackbar.PersistentError(LocaleHelper.Get("setting_copy_logs_error_1"));
             return;
         }
 

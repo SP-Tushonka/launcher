@@ -1,0 +1,195 @@
+@implements IDisposable
+@inject SPTarkov.Core.Runtime.OfflineRuntime OfflineRuntime
+@inject ILogger<EventSettingsPanel> Logger
+@using SPTarkov.Core.Runtime
+@using System.Globalization
+
+@if (OfflineRuntime.IsExternalBackend || !OfflineRuntime.EnvironmentAvailable)
+{
+    <MudText Class="mb-4">Server settings are managed on the server computer.</MudText>
+}
+else
+{
+<MudPaper Elevation="2" Class="pa-3 mb-4 mud-background-gray border-2 border-solid mud-border-lines-default card-container">
+    <div class="event-heading">
+        <MudText Typo="Typo.h6">Events &amp; seasons</MudText>
+        <MudText Typo="Typo.caption" Class="mud-text-secondary">Local server Â· all profiles</MudText>
+    </div>
+    @if (_settings is not null)
+    {
+        <div class="event-fields">
+            <MudSelect T="string" Label="Holiday event" Value="_event" ValueChanged="ChangeHoliday" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="@ControlsDisabled">
+                @foreach (var option in _settings.HolidayEvents)
+                {
+                    <MudSelectItem T="string" Value="@option.Id">@option.Label</MudSelectItem>
+                }
+            </MudSelect>
+            <MudDatePicker Label="Holiday end date" @bind-Date="_eventEndDate" DateFormat="MMM dd, yyyy" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="@(ControlsDisabled || _event == "none")" Editable="false"/>
+        </div>
+        <div class="event-fields event-season-fields">
+            <div class="event-season-description">
+                <MudText Typo="Typo.subtitle2">Progression season</MudText>
+                <MudText Typo="Typo.caption" Class="mud-text-secondary">Changes the deadline, without wiping progress.</MudText>
+            </div>
+            <MudDatePicker Label="Progression end date" @bind-Date="_progressionEndDate" DateFormat="MMM dd, yyyy" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="@ControlsDisabled" Editable="false"/>
+        </div>
+        <div class="event-fields event-season-fields">
+            <MudSelect T="string" Label="Weather season" @bind-Value="_weatherSeason" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="@ControlsDisabled">
+                <MudSelectItem T="string" Value="@string.Empty">Automatic (calendar)</MudSelectItem>
+                @foreach (var option in _settings.WeatherSeasons)
+                {
+                    <MudSelectItem T="string" Value="@(option.Value.ToString(CultureInfo.InvariantCulture))">@WeatherLabel(option)</MudSelectItem>
+                }
+            </MudSelect>
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">Weather is separate from holiday events and progression.</MudText>
+        </div>
+        <MudText Typo="Typo.caption" Class="mud-text-secondary">Holiday ends at @Clock(_settings.HolidayEndTime) (@_settings.ServerTimeZone). Progression ends at @Clock(_settings.ProgressionEndTime) (@_settings.ProgressionTimeZone).</MudText>
+        <MudText Typo="Typo.caption" Class="mud-text-secondary">Applying changes restarts the local server. No game can be running.</MudText>
+    }
+    <div class="event-footer">
+        <MudText Typo="Typo.caption" aria-live="polite">@(_busy ? _applying ? "Applying settings and restarting serverâ€¦" : "Loading server settingsâ€¦" : ValidationMessage)</MudText>
+        <div class="event-actions">
+            <MudButton OnClick="Reload" Disabled="@(Disabled || _busy)" Variant="Variant.Outlined" Color="Color.Default">Reload</MudButton>
+            <MudButton OnClick="Apply" Disabled="@(!CanApply)" Variant="Variant.Filled" Color="Color.Dark">Apply &amp; restart server</MudButton>
+        </div>
+    </div>
+    @if (_error is not null)
+    {
+        <MudAlert Severity="Severity.Warning" Class="mt-2" role="alert">@_error</MudAlert>
+    }
+</MudPaper>
+}
+
+@code {
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback<bool> BusyChanged { get; set; }
+    private readonly CancellationTokenSource _lifetime = new();
+    private EnvironmentSnapshot? _settings;
+    private bool _busy;
+    private bool _applying;
+    private bool _disposed;
+    private string _event = "none";
+    private DateTime? _eventEndDate;
+    private DateTime? _progressionEndDate;
+    private string _weatherSeason = string.Empty;
+    private string? _error;
+    private string _message = "Load the current server settings to begin.";
+    private bool ControlsDisabled => Disabled || _busy || OfflineRuntime.EnvironmentChangeUncertain;
+    private bool CanApply => !ControlsDisabled && _settings is not null && TrySelection(out var draft) && draft != _settings.Selection;
+
+    private string ValidationMessage
+    {
+        get
+        {
+            if (_settings is null || OfflineRuntime.EnvironmentChangeUncertain) return _message;
+            if (_event != "none" && _eventEndDate is null) return "Choose a holiday end date.";
+            if (_progressionEndDate is null) return "Choose a progression end date.";
+            if (!TrySelection(out _)) return "Choose dates that are valid in the server time zone.";
+            return _message;
+        }
+    }
+
+    protected override Task OnInitializedAsync() => OfflineRuntime.IsExternalBackend || !OfflineRuntime.EnvironmentAvailable ? Task.CompletedTask : Reload();
+
+    private static string Clock(string time) => TimeOnly.ParseExact(time, "HH:mm:ss", CultureInfo.InvariantCulture).ToString("h:mm tt", CultureInfo.InvariantCulture);
+
+    private static string WeatherLabel(WeatherSeasonOption option) => option.Value switch
+    {
+        0 => "Summer", 1 => "Fall", 2 => "Winter", 3 => "Spring",
+        4 => "Late fall", 5 => "Early spring", 6 => "Storm", _ => option.Label
+    };
+
+    private void ChangeHoliday(string value)
+    {
+        if (ControlsDisabled) return;
+        _event = value;
+        if (value == "none") _eventEndDate = null;
+    }
+
+    private bool TrySelection(out EnvironmentSelection selection)
+    {
+        selection = new(_event, _event == "none" || _eventEndDate is null ? null : DateOnly.FromDateTime(_eventEndDate.Value),
+            _progressionEndDate is null ? default : DateOnly.FromDateTime(_progressionEndDate.Value),
+            string.IsNullOrEmpty(_weatherSeason) ? null : int.Parse(_weatherSeason, CultureInfo.InvariantCulture));
+        if (_settings is null) return false;
+        try { selection.Validate(_settings, DateTimeOffset.UtcNow); return true; }
+        catch (InvalidOperationException) { return false; }
+    }
+
+    private void ShowSettings(EnvironmentSnapshot settings, bool replaceDraft)
+    {
+        _settings = settings;
+        if (!replaceDraft) return;
+        _event = settings.HolidayEventId;
+        _eventEndDate = settings.HolidayEndDate?.ToDateTime(TimeOnly.MinValue);
+        _progressionEndDate = settings.ProgressionEndDate.ToDateTime(TimeOnly.MinValue);
+        _weatherSeason = settings.WeatherOverrideSeason?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+    }
+
+    private Task Reload() => Run(false);
+    private Task Apply() => Run(true);
+
+    private async Task Run(bool apply)
+    {
+        if (_disposed || Disabled || _busy || OfflineRuntime.IsExternalBackend || !OfflineRuntime.EnvironmentAvailable || (apply && !CanApply)) return;
+        _busy = true;
+        _applying = apply;
+        _error = null;
+        bool acquired = false;
+        try
+        {
+            // The parent takes the profile/navigation lock before any IPC is issued.
+            await BusyChanged.InvokeAsync(true);
+            acquired = true;
+            var snapshot = apply
+                ? await OfflineRuntime.ApplyEnvironmentAsync(GetSelection(), _settings!.Revision, _lifetime.Token)
+                : await OfflineRuntime.ReadEnvironmentAsync(_lifetime.Token);
+            if (_disposed) return;
+            ShowSettings(snapshot, true);
+            _message = apply ? "Settings saved. Local server is ready." : "Current server settings loaded.";
+        }
+        catch (EnvironmentSettingsException ex)
+        {
+            Logger.LogError(ex, "Server settings were refused");
+            if (_disposed) return;
+            ShowSettings(ex.CurrentSettings, false);
+            _error = DescribeRefusal(ex.Message) + " Your draft is kept for review; Reload discards it.";
+        }
+        catch (OperationCanceledException) when (_disposed) { }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Server settings failed");
+            if (_disposed) return;
+            _error = OfflineRuntime.EnvironmentChangeUncertain
+                ? "The previous change could not be confirmed. Use Reload before Play or disconnecting. Details are in the launcher log."
+                : "Server settings could not be loaded. Use Reload to try again. Details are in the launcher log.";
+        }
+        finally
+        {
+            _busy = false;
+            _applying = false;
+            if (acquired && !_disposed) await BusyChanged.InvokeAsync(false);
+        }
+    }
+
+    private static string DescribeRefusal(string message)
+    {
+        if (message.StartsWith("ENV_REVISION_CONFLICT", StringComparison.Ordinal)) return "Server settings changed elsewhere.";
+        if (message.StartsWith("ENV_VALIDATION:", StringComparison.Ordinal)) return "Check the event, season and end dates.";
+        if (message.StartsWith("ENV_BUSY", StringComparison.Ordinal)) return "The local server is busy. Finish the current operation first.";
+        return "The server could not apply these settings.";
+    }
+
+    private EnvironmentSelection GetSelection()
+    {
+        if (!TrySelection(out var draft)) throw new InvalidOperationException("Choose valid event, date, and weather settings.");
+        return draft;
+    }
+
+    public void Dispose()
+    {
+        _disposed = true;
+        _lifetime.Cancel();
+        _lifetime.Dispose();
+    }
+}

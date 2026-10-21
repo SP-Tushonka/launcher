@@ -1,4 +1,4 @@
-﻿namespace SPTarkov.Core.Configuration;
+namespace SPTarkov.Core.Configuration;
 
 public record LauncherSettings
 {
@@ -29,6 +29,16 @@ public record LauncherSettings
     public bool ClearCacheOnLaunch { get; set; }
 
     public bool AutoConnectLastProfile { get; set; }
+
+    /// <summary>Start the local server when connecting if no compatible server is running.</summary>
+    public bool StartLocalServerAutomatically { get; set; } = true;
+    public string StartupServerId { get; set; } = Server.LocalServerId;
+
+    /// <summary>Require verified connection protection on Play; never used as proof of installed filters.</summary>
+    public bool RequireGameConnections { get; set; }
+
+    /// <summary>Request the verified BepInEx host on Play; individual mod compatibility is separate.</summary>
+    public bool EnableManagedHost { get; set; } = false;
 
     /// <summary>The last server/profile the user launched with.</summary>
     public PreferredProfile? PreferredProfile { get; set; }
