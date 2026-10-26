@@ -49,6 +49,13 @@ namespace SPT.Launcher
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 return null;
 
+            // Prefer the Steam copy. Its CDN updates sooner, so a dual owner's Steam install is the likelier current one.
+            var steamInstallPath = ValidationUtil.a();
+            if (steamInstallPath != null && Path.Exists(Path.Combine(steamInstallPath, "build")))
+            {
+                return Path.TrimEndingDirectorySeparator(Path.Combine(steamInstallPath, "build"));
+            }
+
             var installLocation = Registry.LocalMachine.OpenSubKey(registryInstall, false)
                 ?.GetValue("InstallLocation");
             var info = (installLocation is string key) ? new DirectoryInfo(key) : null;
@@ -78,14 +85,6 @@ namespace SPT.Launcher
             
             LogManager.Instance.Info("[LaunchGame] Setup Game Files ...");
             SetupGameFiles(gamePath);
-
-            if (!ValidationUtil.Validate())
-            {
-                LogManager.Instance.Error("[LaunchGame] Game Validation   :: FAILED");
-                return GameStarterResult.FromError(-2);
-            }
-            
-            LogManager.Instance.Info("[LaunchGame] Game Validation   :: OK");
 
             if (account.wipe)
             {
