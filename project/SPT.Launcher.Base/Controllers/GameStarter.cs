@@ -93,14 +93,6 @@ namespace SPT.Launcher
             LogManager.Instance.Info("[LaunchGame] Setup Game Files ...");
             SetupGameFiles(gamePath);
 
-            if (!ValidationUtil.Validate())
-            {
-                LogManager.Instance.Error("[LaunchGame] Game Validation   :: FAILED");
-                return GameStarterResult.FromError(-2);
-            }
-            
-            LogManager.Instance.Info("[LaunchGame] Game Validation   :: OK");
-
             if (account.wipe)
             {
                 LogManager.Instance.Info("[LaunchGame] Wipe profile requested");
