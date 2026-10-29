@@ -1,0 +1,32 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+    xmlns:l="using:SPTarkov.Launcher.Markup"
+    x:Class="SPTarkov.Launcher.Views.Dialogs.ProgressDialog"
+    Width="444"
+>
+    <c:GlassBorder
+        Layer="Dialog"
+        Background="{StaticResource GlassFill}"
+        BorderBrush="{StaticResource Lines}"
+        BorderThickness="2"
+        CornerRadius="4"
+        BoxShadow="{StaticResource Elevation24}"
+        Padding="24,16"
+    >
+        <StackPanel Spacing="12">
+            <StackPanel Spacing="16" Margin="24,0">
+                <Arc Classes="spinner" HorizontalAlignment="Center" RenderTransformOrigin="50%,50%">
+                    <Arc.RenderTransform>
+                        <RotateTransform />
+                    </Arc.RenderTransform>
+                </Arc>
+                <TextBlock x:Name="StepText" Classes="body1" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" />
+            </StackPanel>
+            <Button Classes="glass" HorizontalAlignment="Right" Click="OnCancel">
+                <TextBlock Classes="button" Text="{l:Locale server_login_cancel, Upper=True}" />
+            </Button>
+        </StackPanel>
+    </c:GlassBorder>
+</UserControl>

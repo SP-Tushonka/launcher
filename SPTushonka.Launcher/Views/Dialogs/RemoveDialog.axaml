@@ -1,0 +1,23 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+    x:Class="SPTarkov.Launcher.Views.Dialogs.RemoveDialog"
+>
+    <c:GlassBorder Classes="dialog" Padding="24,16">
+        <StackPanel Spacing="12">
+            <TextBlock x:Name="Question" Classes="body1" TextWrapping="Wrap" />
+            <Border BorderBrush="{StaticResource Lines}" BorderThickness="2" CornerRadius="4" Padding="12">
+                <Grid x:Name="Details" Classes="details" ColumnDefinitions="Auto,*" />
+            </Border>
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                <Button Classes="glass danger" Click="OnConfirm">
+                    <TextBlock x:Name="ConfirmText" Classes="button" />
+                </Button>
+                <Button Classes="glass" Click="OnCancel">
+                    <TextBlock x:Name="CancelText" Classes="button" />
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </c:GlassBorder>
+</UserControl>

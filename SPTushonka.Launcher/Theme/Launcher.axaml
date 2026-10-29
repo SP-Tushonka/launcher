@@ -1,0 +1,594 @@
+<Styles
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+>
+    <Styles.Resources>
+        <FontFamily x:Key="RobotoFont">avares://SPT.Launcher/Assets/Fonts#Roboto</FontFamily>
+        <FontFamily x:Key="MonoFont">Cascadia Code, Consolas, Roboto Mono, monospace</FontFamily>
+
+        <SolidColorBrush x:Key="TextPrimary" Color="#B3FFFFFF" />
+        <SolidColorBrush x:Key="TextSecondary" Color="#80FFFFFF" />
+        <SolidColorBrush x:Key="TextDisabled" Color="#42FFFFFF" />
+        <SolidColorBrush x:Key="GlassFill" Color="#B319191F" />
+        <SolidColorBrush x:Key="Lines" Color="#1EFFFFFF" />
+        <SolidColorBrush x:Key="InputLines" Color="#4CFFFFFF" />
+        <SolidColorBrush x:Key="DisabledFill" Color="#1EFFFFFF" />
+
+        <BoxShadows x:Key="Elevation1">0 2 1 -1 #33000000, 0 1 1 0 #24000000, 0 1 3 0 #1F000000</BoxShadows>
+        <BoxShadows x:Key="Elevation2">0 3 1 -2 #33000000, 0 2 2 0 #24000000, 0 1 5 0 #1F000000</BoxShadows>
+        <BoxShadows x:Key="Elevation5">0 3 5 -1 #33000000, 0 5 8 0 #24000000, 0 1 14 0 #1F000000</BoxShadows>
+        <BoxShadows x:Key="Elevation24">0 11 15 -7 #33000000, 0 24 38 3 #24000000, 0 9 46 8 #1F000000</BoxShadows>
+
+        <StreamGeometry x:Key="IconServers">
+            M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12zM4 14v2h2c0-1.11-.89-2-2-2zm0-3v1.43c1.97 0 3.57 1.6 3.57 3.57H9c0-2.76-2.24-5-5-5zm0-3v1.45c3.61 0 6.550 2.93 6.55 6.55H12c0-4.42-3.59-8-8-8z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconSettings">
+            M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconInfo">
+            M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconAddServer">
+            M21 3H3c-1.11 0-2 .89-2 2v12c0 1.1.89 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.11-.9-2-2-2zm0 14H3V5h18v12zm-5-7v2h-3v3h-2v-3H8v-2h3V7h2v3h3z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconDns">
+            M20 13H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zM7 19c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM20 3H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1zM7 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconLock">
+            M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconBuild">
+            M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconExtension">
+            M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconArrowDropDown">M7 10l5 5 5-5z</StreamGeometry>
+        <StreamGeometry x:Key="IconFolder">
+            M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconSave">
+            M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconScrollTop">
+            M12,20c-4.41,0-8-3.59-8-8s3.59-8,8-8s8,3.59,8,8S16.41,20,12,20 M12,22c5.52,0,10-4.48,10-10c0-5.52-4.48-10-10-10 C6.48,2,2,6.48,2,12C2,17.52,6.48,22,12,22L12,22z M11,12l0,4h2l0-4h3l-4-4l-4,4H11z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconDelete">M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z</StreamGeometry>
+        <StreamGeometry x:Key="IconArrowBack">M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z</StreamGeometry>
+        <StreamGeometry x:Key="IconArrowForward">M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z</StreamGeometry>
+        <StreamGeometry x:Key="IconPerson">
+            M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconPersonAdd">
+            M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconFileCopy">
+            M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm-1 4l6 6v10c0 1.1-.9 2-2 2H7.99C6.89 23 6 22.1 6 21l.01-14c0-1.1.89-2 1.99-2h7zm-1 7h5.5L14 6.5V12z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconLogin">
+            M11 7 9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconCheckBox">
+            M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconPersonSearch">
+            M10 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm.35 2.01C7.62 13.91 2 15.27 2 18v2h9.54c-2.47-2.76-1.23-5.89-1.19-5.99zm9.08 4.01c.36-.59.57-1.28.57-2.02 0-2.21-1.79-4-4-4s-4 1.79-4 4 1.79 4 4 4c.74 0 1.43-.22 2.02-.57L20.59 22 22 20.59l-2.57-2.57zM16 18c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconLinkOff">
+            M17 7h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1 0 1.43-.98 2.63-2.31 2.98l1.46 1.46C20.88 15.61 22 13.95 22 12c0-2.76-2.24-5-5-5zm-1 4h-2.19l2 2H16zM2 4.27l3.11 3.11C3.29 8.12 2 9.91 2 12c0 2.76 2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1 0-1.59 1.21-2.9 2.76-3.07L8.73 11H8v2h2.73L13 15.27V17h1.73l4.01 4L20 19.74 3.27 3 2 4.27z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconAdd">M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z</StreamGeometry>
+        <StreamGeometry x:Key="IconMenuBook">
+            M21,5c-1.11-0.35-2.33-0.5-3.5-0.5c-1.95,0-4.05,0.4-5.5,1.5c-1.45-1.1-3.55-1.5-5.5-1.5S2.45,4.9,1,6v14.65 c0,0.25,0.25,0.5,0.5,0.5c0.1,0,0.15-0.05,0.25-0.05C3.1,20.45,5.05,20,6.5,20c1.95,0,4.05,0.4,5.5,1.5c1.35-0.85,3.8-1.5,5.5-1.5 c1.65,0,3.35,0.3,4.75,1.05c0.1,0.05,0.15,0.05,0.25,0.05c0.25,0,0.5-0.25,0.5-0.5V6C22.4,5.55,21.75,5.25,21,5z M21,18.5 c-1.1-0.35-2.3-0.5-3.5-0.5c-1.7,0-4.15,0.65-5.5,1.5V8c1.35-0.85,3.8-1.5,5.5-1.5c1.2,0,2.4,0.15,3.5,0.5V18.5z M17.5,10.5c0.88,0,1.73,0.09,2.5,0.26V9.24C19.21,9.09,18.36,9,17.5,9c-1.7,0-3.24,0.29-4.5,0.83v1.66 C14.13,10.85,15.7,10.5,17.5,10.5z M13,12.49v1.66c1.13-0.64,2.7-0.99,4.5-0.99c0.88,0,1.73,0.09,2.5,0.26V11.9c-0.79-0.15-1.64-0.24-2.5-0.24 C15.8,11.66,14.26,11.96,13,12.49z M17.5,14.33c-1.7,0-3.24,0.29-4.5,0.83v1.66c1.13-0.64,2.7-0.99,4.5-0.99c0.88,0,1.73,0.09,2.5,0.26v-1.52 C19.21,14.41,18.36,14.33,17.5,14.33z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconPublic">
+            M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconHistory">
+            M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconTranslate">
+            M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconOpenInNew">
+            M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconGitHub">
+            M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2 0 1.9 1.2 1.9 1.2 1 1.8 2.8 1.3 3.5 1 0-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.2.5-2.3 1.3-3.1-.2-.4-.6-1.6 0-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8 0 3.2.9.8 1.3 1.9 1.3 3.2 0 4.6-2.8 5.6-5.5 5.9.5.4.9 1 .9 2.2v3.3c0 .3.1.7.8.6A12 12 0 0 0 12 .3
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconDiscord">
+            M19,6.75A9.2017,9.2017,0,0,0,14.625,5l-.2135.4274a8.4519,8.4519,0,0,1,4.151,2.1976A12.87,12.87,0,0,0,12,5.875a12.87,12.87,0,0,0-6.5625,1.75,8.6339,8.6339,0,0,1,4.151-2.1976L9.375,5A9.1429,9.1429,0,0,0,5,6.75S2.76,9.9989,2.375,16.375A8.2659,8.2659,0,0,0,8.0625,19l.7175-.9555A8.7654,8.7654,0,0,1,5,15.5a11.032,11.032,0,0,0,7,2.1875A11.032,11.032,0,0,0,19,15.5a8.7609,8.7609,0,0,1-3.78,2.5445L15.9375,19a8.2659,8.2659,0,0,0,5.6875-2.625C21.24,9.9989,19,6.75,19,6.75ZM9.1562,14.625a1.6511,1.6511,0,0,1-1.5312-1.75,1.6511,1.6511,0,0,1,1.5312-1.75,1.6511,1.6511,0,0,1,1.5313,1.75A1.6511,1.6511,0,0,1,9.1562,14.625Zm5.6876,0a1.6511,1.6511,0,0,1-1.5313-1.75,1.6511,1.6511,0,0,1,1.5313-1.75,1.6511,1.6511,0,0,1,1.5312,1.75A1.6511,1.6511,0,0,1,14.8438,14.625Z
+        </StreamGeometry>
+        <StreamGeometry x:Key="IconCheckBoxBlank">
+            M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z
+        </StreamGeometry>
+    </Styles.Resources>
+
+    <Style Selector="c|GlassBorder.card">
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Background" Value="{StaticResource GlassFill}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Lines}" />
+        <Setter Property="BorderThickness" Value="2" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="BoxShadow" Value="{StaticResource Elevation2}" />
+    </Style>
+    <!-- Clickable cards lift on hover and bring their muted header actions to full opacity -->
+    <Style Selector="c|GlassBorder.card.interactive">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="RenderTransform" Value="none" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="BorderBrush" Duration="0:0:0.2" />
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="c|GlassBorder.card.info">
+        <Setter Property="BoxShadow" Value="{StaticResource Elevation1}" />
+    </Style>
+    <Style Selector="c|GlassBorder.card.interactive:pointerover">
+        <Setter Property="BorderBrush" Value="#80FFFFFF" />
+        <Setter Property="BoxShadow" Value="0 6 20 0 #59000000" />
+        <Setter Property="RenderTransform" Value="translate(0px, -2px)" />
+    </Style>
+    <Style Selector="StackPanel.actions">
+        <Setter Property="Opacity" Value="0.4" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <DoubleTransition Property="Opacity" Duration="0:0:0.2" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <!-- A link card's domain and open-in-new icon brighten with the card -->
+    <Style Selector="StackPanel.external > TextBlock">
+        <Setter Property="Foreground" Value="#59FFFFFF" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Foreground" Duration="0:0:0.2" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="c|GlassBorder.card.interactive:pointerover StackPanel.external > TextBlock">
+        <Setter Property="Foreground" Value="#B3FFFFFF" />
+    </Style>
+    <Style Selector="StackPanel.external > c|MaterialIcon">
+        <Setter Property="Foreground" Value="#59FFFFFF" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Foreground" Duration="0:0:0.2" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="c|GlassBorder.card.interactive:pointerover StackPanel.external > c|MaterialIcon">
+        <Setter Property="Foreground" Value="#B3FFFFFF" />
+    </Style>
+    <Style Selector="c|GlassBorder.card.interactive:pointerover StackPanel.actions">
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="Button.delete:pointerover c|MaterialIcon">
+        <Setter Property="Foreground" Value="#EF5350" />
+    </Style>
+
+    <Style Selector="Arc.spinner">
+        <Setter Property="Width" Value="56" />
+        <Setter Property="Height" Value="56" />
+        <Setter Property="Stroke" Value="#776BE7" />
+        <Setter Property="StrokeThickness" Value="4.6" />
+        <Setter Property="StrokeLineCap" Value="Round" />
+        <Setter Property="StartAngle" Value="0" />
+        <Setter Property="SweepAngle" Value="100" />
+        <Style.Animations>
+            <Animation Duration="0:0:1.4" IterationCount="Infinite">
+                <KeyFrame Cue="0%">
+                    <Setter Property="RotateTransform.Angle" Value="0" />
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="RotateTransform.Angle" Value="360" />
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+
+    <!-- Tooltips render inside the window so they can draw glass over the page. The setting is read from the control that owns the tip -->
+    <Style Selector=":is(Control)">
+        <Setter Property="ToolTip.ShouldUseOverlayLayer" Value="True" />
+    </Style>
+
+    <Style Selector="Window">
+        <Setter Property="FontFamily" Value="{StaticResource RobotoFont}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="Background" Value="#27272F" />
+    </Style>
+
+    <Style Selector="TextBlock">
+        <Setter Property="LetterSpacing" Value="0.15" />
+        <Setter Property="LineHeight" Value="20.02" />
+    </Style>
+    <Style Selector="TextBlock.caption">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="LineHeight" Value="19.92" />
+        <Setter Property="LetterSpacing" Value="0.4" />
+    </Style>
+    <Style Selector="TextBlock.h6">
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="LineHeight" Value="32" />
+    </Style>
+    <Style Selector="TextBlock.body1">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="LineHeight" Value="24" />
+    </Style>
+    <Style Selector="TextBlock.mono">
+        <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
+        <Setter Property="LetterSpacing" Value="0.4" />
+    </Style>
+    <Style Selector="TextBlock.status">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="LineHeight" Value="17.16" />
+        <Setter Property="LetterSpacing" Value="0.48" />
+    </Style>
+    <Style Selector="TextBlock.button">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="LineHeight" Value="24.5" />
+        <Setter Property="LetterSpacing" Value="0.4" />
+    </Style>
+
+    <Style Selector="Button.glass">
+        <Setter Property="Height" Value="41" />
+        <Setter Property="Padding" Value="16,6" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <c:GlassBorder
+                    Name="PART_Glass"
+                    Background="{StaticResource GlassFill}"
+                    BorderBrush="{StaticResource Lines}"
+                    BorderThickness="2"
+                    CornerRadius="4"
+                    BoxShadow="{StaticResource Elevation2}"
+                >
+                    <!-- The disabled tint sits over the glass fill rather than replacing it -->
+                    <Panel>
+                        <Border Name="Tint" CornerRadius="2" />
+                        <ContentPresenter
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Margin="{TemplateBinding Padding}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                        />
+                    </Panel>
+                </c:GlassBorder>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.glass:pointerover /template/ c|GlassBorder#PART_Glass">
+        <Setter Property="Background" Value="#C2232329" />
+    </Style>
+    <Style Selector="Button.glass:disabled">
+        <Setter Property="Foreground" Value="{StaticResource TextDisabled}" />
+    </Style>
+    <Style Selector="Button.glass:disabled /template/ c|GlassBorder#PART_Glass">
+        <Setter Property="BoxShadow" Value="none" />
+    </Style>
+    <Style Selector="Button.glass:disabled /template/ Border#Tint">
+        <Setter Property="Background" Value="{StaticResource DisabledFill}" />
+    </Style>
+    <!-- Confirm button for destructive actions -->
+    <Style Selector="Button.glass.danger">
+        <Setter Property="Foreground" Value="Black" />
+    </Style>
+    <Style Selector="Button.glass.danger /template/ c|GlassBorder#PART_Glass">
+        <Setter Property="Background" Value="#C62828" />
+        <Setter Property="BorderBrush" Value="#7F1D1D" />
+        <Setter Property="BoxShadow" Value="none" />
+    </Style>
+
+    <Style Selector="c|GlassBorder.dialog">
+        <Setter Property="Layer" Value="Dialog" />
+        <Setter Property="Width" Value="444" />
+        <Setter Property="Background" Value="{StaticResource GlassFill}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Lines}" />
+        <Setter Property="BorderThickness" Value="2" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="BoxShadow" Value="{StaticResource Elevation24}" />
+    </Style>
+    <!-- Tinted ring behind a dialog header icon. Each dialog sets its colour -->
+    <Style Selector="Border.dialogIcon">
+        <Setter Property="Width" Value="42" />
+        <Setter Property="Height" Value="42" />
+        <Setter Property="CornerRadius" Value="21" />
+        <Setter Property="BorderThickness" Value="2" />
+    </Style>
+    <Style Selector="Grid.details">
+        <Setter Property="ColumnSpacing" Value="32" />
+        <Setter Property="RowSpacing" Value="4" />
+    </Style>
+    <Style Selector="Grid.details > TextBlock">
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.icon">
+        <Setter Property="Padding" Value="2" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}" CornerRadius="12" Padding="{TemplateBinding Padding}">
+                    <ContentPresenter Content="{TemplateBinding Content}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="TextBox.outlined">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="LetterSpacing" Value="0.15" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="PlaceholderForeground" Value="#99FFFFFF" />
+        <Setter Property="CaretBrush" Value="{StaticResource TextPrimary}" />
+        <Setter Property="SelectionBrush" Value="#776BE7" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="13,0" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TextBox.outlined /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="TextBox.outlined:pointerover /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="TextBox.outlined:focus /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style Selector="c|OutlinedField c|OutlineBorder, c|OutlinedSelect c|OutlineBorder">
+        <Setter Property="Stroke" Value="{StaticResource InputLines}" />
+    </Style>
+    <Style Selector="c|OutlinedField TextBlock.helper, c|OutlinedSelect TextBlock.helper">
+        <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+    </Style>
+    <Style Selector="c|OutlinedField.error c|OutlineBorder, c|OutlinedSelect.error c|OutlineBorder">
+        <Setter Property="Stroke" Value="#F64E62" />
+    </Style>
+    <Style Selector="c|OutlinedField.error TextBlock#FloatingLabel, c|OutlinedField.error TextBlock.helper, c|OutlinedSelect.error TextBlock#FloatingLabel, c|OutlinedSelect.error TextBlock.helper">
+        <Setter Property="Foreground" Value="#F64E62" />
+    </Style>
+    <Style Selector="c|OutlinedField:disabled, c|OutlinedSelect:disabled">
+        <Setter Property="Opacity" Value="0.5" />
+    </Style>
+
+    <!-- Input of OutlinedSelect, which draws the frame and label around it -->
+    <Style Selector="ComboBox.outlined">
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <DockPanel Background="Transparent" Margin="14,0,8,0">
+                        <c:MaterialIcon
+                            DockPanel.Dock="Right"
+                            Data="{StaticResource IconArrowDropDown}"
+                            Foreground="#80FFFFFF"
+                            Width="24"
+                            Height="24"
+                            VerticalAlignment="Center"
+                        />
+                        <ContentPresenter
+                            Content="{TemplateBinding SelectionBoxItem}"
+                            ContentTemplate="{TemplateBinding ItemTemplate}"
+                            VerticalAlignment="Center"
+                        />
+                    </DockPanel>
+                    <Popup
+                        Name="PART_Popup"
+                        ShouldUseOverlayLayer="True"
+                        IsOpen="{TemplateBinding IsDropDownOpen, Mode=TwoWay}"
+                        Placement="BottomEdgeAlignedLeft"
+                        IsLightDismissEnabled="True"
+                        MinWidth="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
+                        x:DataType="ComboBox"
+                    >
+                        <Border
+                            Background="#F219191F"
+                            BorderBrush="{StaticResource Lines}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            BoxShadow="{StaticResource Elevation5}"
+                            Padding="0,8"
+                        >
+                            <ScrollViewer MaxHeight="192">
+                                <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                            </ScrollViewer>
+                        </Border>
+                    </Popup>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="ComboBox.outlined ComboBoxItem">
+        <Setter Property="Padding" Value="16,6" />
+        <Setter Property="FontSize" Value="16" />
+    </Style>
+
+    <Style Selector="Button.text">
+        <Setter Property="Padding" Value="5,4" />
+        <Setter Property="Foreground" Value="#776BE7" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                    <ContentPresenter Content="{TemplateBinding Content}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.text:pointerover">
+        <Setter Property="Background" Value="#14776BE7" />
+    </Style>
+
+    <!-- A settings row that toggles as a whole, with the switch drawn on its right -->
+    <Style Selector="ToggleButton.setting">
+        <Setter Property="Padding" Value="20,8,0,8" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.2" />
+            </Transitions>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}" CornerRadius="5" Padding="{TemplateBinding Padding}">
+                    <DockPanel>
+                        <Panel DockPanel.Dock="Right" Width="58" Height="38">
+                            <Border Name="Track" Width="34" Height="14" CornerRadius="9" Background="#ADADB1" Opacity="0.48" />
+                            <Border
+                                Name="Thumb"
+                                Width="20"
+                                Height="20"
+                                CornerRadius="10"
+                                Margin="9,0,0,0"
+                                Background="#FAFAFA"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                RenderTransform="none"
+                                BoxShadow="{StaticResource Elevation1}"
+                            >
+                                <Border.Transitions>
+                                    <Transitions>
+                                        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15" />
+                                    </Transitions>
+                                </Border.Transitions>
+                            </Border>
+                        </Panel>
+                        <ContentPresenter Name="Label" Content="{TemplateBinding Content}" VerticalAlignment="Center">
+                            <ContentPresenter.Styles>
+                                <Style Selector="TextBlock">
+                                    <Setter Property="FontSize" Value="16" />
+                                    <Setter Property="LineHeight" Value="24" />
+                                </Style>
+                            </ContentPresenter.Styles>
+                        </ContentPresenter>
+                    </DockPanel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="ToggleButton.setting:pointerover">
+        <Setter Property="Background" Value="#33AAAAAA" />
+    </Style>
+    <Style Selector="ToggleButton.setting:checked /template/ Border#Track">
+        <Setter Property="Background" Value="#1EC8A5" />
+        <Setter Property="Opacity" Value="0.5" />
+    </Style>
+    <Style Selector="ToggleButton.setting:checked /template/ Border#Thumb">
+        <Setter Property="Background" Value="#1EC8A5" />
+        <Setter Property="RenderTransform" Value="translate(20px, 0px)" />
+    </Style>
+    <Style Selector="ToggleButton.setting:disabled">
+        <Setter Property="Foreground" Value="{StaticResource TextDisabled}" />
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="ToggleButton.setting:disabled /template/ ContentPresenter#Label">
+        <Setter Property="Opacity" Value="0.5" />
+    </Style>
+    <Style Selector="ToggleButton.setting:disabled /template/ Border#Track">
+        <Setter Property="Opacity" Value="0.12" />
+    </Style>
+    <Style Selector="ToggleButton.setting:disabled /template/ Border#Thumb">
+        <Setter Property="Background" Value="#9E9E9E" />
+    </Style>
+
+    <!-- Underlined drop-down -->
+    <Style Selector="ComboBox.select">
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <Border Background="Transparent" BorderBrush="{StaticResource InputLines}" BorderThickness="0,0,0,1" Height="32">
+                        <DockPanel>
+                            <c:MaterialIcon
+                                DockPanel.Dock="Right"
+                                Data="{StaticResource IconArrowDropDown}"
+                                Foreground="#80FFFFFF"
+                                Width="24"
+                                Height="24"
+                                VerticalAlignment="Center"
+                            />
+                            <ContentPresenter
+                                Content="{TemplateBinding SelectionBoxItem}"
+                                ContentTemplate="{TemplateBinding ItemTemplate}"
+                                VerticalAlignment="Center"
+                                Margin="0,0,0,1"
+                            />
+                        </DockPanel>
+                    </Border>
+                    <Popup
+                        Name="PART_Popup"
+                        ShouldUseOverlayLayer="True"
+                        IsOpen="{TemplateBinding IsDropDownOpen, Mode=TwoWay}"
+                        Placement="BottomEdgeAlignedLeft"
+                        IsLightDismissEnabled="True"
+                        MinWidth="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
+                        x:DataType="ComboBox"
+                    >
+                        <Border
+                            Background="#F219191F"
+                            BorderBrush="{StaticResource Lines}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            BoxShadow="{StaticResource Elevation5}"
+                            Padding="0,8"
+                        >
+                            <ScrollViewer MaxHeight="192">
+                                <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                            </ScrollViewer>
+                        </Border>
+                    </Popup>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="ComboBox.select ComboBoxItem">
+        <Setter Property="Padding" Value="16,6" />
+        <Setter Property="FontSize" Value="16" />
+    </Style>
+
+    <Style Selector="Button.fab">
+        <Setter Property="Width" Value="40" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <c:GlassBorder
+                    Background="#8027272F"
+                    BorderBrush="{StaticResource Lines}"
+                    BorderThickness="2"
+                    CornerRadius="20"
+                    BoxShadow="0 3 5 -1 #33000000, 0 6 10 0 #24000000, 0 1 18 0 #1F000000"
+                >
+                    <ContentPresenter Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </c:GlassBorder>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

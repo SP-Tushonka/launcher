@@ -1,0 +1,181 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+    xmlns:l="using:SPTarkov.Launcher.Markup"
+    xmlns:v="using:SPTarkov.Launcher.Views"
+    x:Class="SPTarkov.Launcher.Views.ProfileView"
+>
+    <UserControl.Styles>
+        <Style Selector="RadioButton.tab">
+            <Setter Property="Width" Value="160" />
+            <Setter Property="Height" Value="48" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Panel Background="Transparent">
+                        <ContentPresenter
+                            Content="{TemplateBinding Content}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Margin="0,0,0,4"
+                        />
+                        <Border Name="Indicator" Height="2" Background="White" VerticalAlignment="Bottom" IsVisible="False" />
+                    </Panel>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="RadioButton.tab:checked /template/ Border#Indicator">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="StackPanel.stat > TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="ToggleButton.checkbox">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <ContentPresenter Background="Transparent" Content="{TemplateBinding Content}" />
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="ToggleButton.checkbox:disabled">
+            <Setter Property="Opacity" Value="0.5" />
+        </Style>
+        <Style Selector="ProgressBar.success">
+            <Setter Property="Height" Value="4" />
+            <Setter Property="MinHeight" Value="4" />
+            <Setter Property="Foreground" Value="#0BBA83" />
+            <Setter Property="Background" Value="#330BBA83" />
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Value" Duration="0:0:0.2" />
+                </Transitions>
+            </Setter>
+        </Style>
+    </UserControl.Styles>
+
+    <StackPanel Margin="16,12,16,8" Spacing="16">
+        <Panel Height="41">
+            <Button x:Name="LogoutButton" Classes="glass" HorizontalAlignment="Left" Padding="12,6,16,6" Click="OnLogout">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <c:MaterialIcon
+                        Data="{StaticResource IconArrowBack}"
+                        Foreground="#F64E62"
+                        Width="20"
+                        Height="20"
+                        VerticalAlignment="Center"
+                    />
+                    <TextBlock Classes="button" Text="{l:Locale profile_logout, Upper=True}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+
+            <StackPanel
+                Orientation="Horizontal"
+                Spacing="8"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                IsHitTestVisible="False"
+            >
+                <StackPanel.Effect>
+                    <DropShadowEffect OffsetX="0" OffsetY="0" BlurRadius="6" Color="#E6000000" />
+                </StackPanel.Effect>
+                <c:MaterialIcon x:Name="NameIcon" Data="{StaticResource IconPerson}" Width="24" Height="24" VerticalAlignment="Center" />
+                <TextBlock x:Name="Nickname" FontSize="24" LineHeight="32" LetterSpacing="0" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                <c:GlassBorder x:Name="WipeBox" Classes="card" Padding="8,0" Height="41">
+                    <ToggleButton x:Name="WipeToggle" Classes="checkbox" VerticalAlignment="Center" Click="OnWipeToggled">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <c:MaterialIcon
+                                x:Name="WipeGlyph"
+                                Data="{StaticResource IconCheckBoxBlank}"
+                                Foreground="#ADADB1"
+                                Width="24"
+                                Height="24"
+                            />
+                            <TextBlock Classes="body1" Text="{l:Locale profile_wipe_checkbox}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </ToggleButton>
+                </c:GlassBorder>
+                <Button x:Name="StartButton" Classes="glass" Padding="16,6,12,6" Click="OnStartGame">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock
+                            x:Name="StartText"
+                            Classes="button"
+                            Text="{l:Locale profile_start_game, Upper=True}"
+                            VerticalAlignment="Center"
+                        />
+                        <c:MaterialIcon
+                            x:Name="StartIcon"
+                            Data="{StaticResource IconArrowForward}"
+                            Foreground="#0BBA83"
+                            Width="20"
+                            Height="20"
+                            VerticalAlignment="Center"
+                        />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Panel>
+
+        <Grid ColumnDefinitions="1*,2*" ColumnSpacing="16">
+            <v:ProfileCard x:Name="Card" />
+
+            <c:GlassBorder Grid.Column="1" Classes="card" Padding="0">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <RadioButton x:Name="OverallTab" Classes="tab" GroupName="stats" IsChecked="True" IsCheckedChanged="OnTabChanged">
+                            <TextBlock Classes="button" Text="{l:Locale profile_stats_overall, Upper=True}" />
+                        </RadioButton>
+                        <RadioButton x:Name="PmcTab" Classes="tab" GroupName="stats" IsCheckedChanged="OnTabChanged">
+                            <TextBlock Classes="button" Text="{l:Locale profile_stats_pmc, Upper=True}" />
+                        </RadioButton>
+                        <RadioButton x:Name="ScavTab" Classes="tab" GroupName="stats" IsCheckedChanged="OnTabChanged">
+                            <TextBlock Classes="button" Text="{l:Locale profile_stats_scav, Upper=True}" />
+                        </RadioButton>
+                    </StackPanel>
+
+                    <StackPanel Margin="32,8,32,8">
+                        <Grid x:Name="TopStats" Margin="24,0" ColumnDefinitions="Auto,*,Auto,*,Auto,*,Auto" />
+                        <Border Height="1" Margin="16,8,16,7" Background="{StaticResource Lines}" />
+                        <Grid x:Name="BottomStats" Margin="24,0" ColumnDefinitions="Auto,*,Auto,*,Auto" />
+                    </StackPanel>
+                </StackPanel>
+            </c:GlassBorder>
+        </Grid>
+
+        <c:GlassBorder Classes="card" Padding="8">
+            <StackPanel x:Name="Currencies" Orientation="Horizontal" Spacing="32" HorizontalAlignment="Center" />
+        </c:GlassBorder>
+
+        <c:GlassBorder Classes="card">
+            <StackPanel Spacing="8">
+                <Grid Margin="24,0" ColumnDefinitions="Auto,*,Auto,*,Auto">
+                    <TextBlock x:Name="CurrentLevel" Classes="body1" />
+                    <TextBlock x:Name="NeededExp" Grid.Column="2" Classes="body1" />
+                    <TextBlock x:Name="NextLevel" Grid.Column="4" Classes="body1" />
+                </Grid>
+                <Panel x:Name="ExpBar" Height="12">
+                    <Border CornerRadius="4" Background="#16ADADB1" />
+                    <Border x:Name="ExpFill" CornerRadius="4" Background="#ADADB1" HorizontalAlignment="Left" />
+                </Panel>
+            </StackPanel>
+        </c:GlassBorder>
+
+        <c:GlassBorder x:Name="BundleCard" Classes="card" Padding="12" IsVisible="False">
+            <StackPanel>
+                <TextBlock x:Name="BundleCount" FontSize="14" FontWeight="Medium" LineHeight="22" LetterSpacing="0.1" Margin="0,0,0,4" />
+                <ProgressBar x:Name="BundleBar" Classes="success" Margin="0,0,0,4" />
+                <StackPanel x:Name="BundleDownload">
+                    <TextBlock x:Name="BundleName" Classes="caption" />
+                    <TextBlock x:Name="BundleSpeed" Classes="caption" />
+                </StackPanel>
+            </StackPanel>
+        </c:GlassBorder>
+    </StackPanel>
+</UserControl>

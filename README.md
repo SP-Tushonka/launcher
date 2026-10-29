@@ -20,8 +20,6 @@ git config --local user.email "USERNAME@SOMETHING.com"
 - Escape From Tarkov *****
 - .NET 10 SDK
 - Visual Studio or Jetbrains Rider
-- webkit2gtk-4.1 dependency for linux users (might be called something slightly different depending on distro :cringe:)
-- WebView2 dependency for windows users, this should be on windows by default
 
 ## Build
 - Open your terminal at `RepositoryFolder`

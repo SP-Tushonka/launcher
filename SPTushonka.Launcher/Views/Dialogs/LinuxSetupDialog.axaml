@@ -1,0 +1,41 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+    xmlns:l="using:SPTarkov.Launcher.Markup"
+    xmlns:v="using:SPTarkov.Launcher.Views"
+    x:Class="SPTarkov.Launcher.Views.Dialogs.LinuxSetupDialog"
+>
+    <!-- Shown at startup on Linux until the prefix, umu and Proton settings are valid -->
+    <c:GlassBorder Classes="dialog" Width="900" Padding="24,16">
+        <!-- The settings scroll when the window is too short for the whole dialog -->
+        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="8">
+            <Border BorderBrush="#FFA800" BorderThickness="1" CornerRadius="4" Padding="16,6">
+                <DockPanel>
+                    <c:MaterialIcon
+                        DockPanel.Dock="Left"
+                        Data="M12 5.99 19.53 19H4.47L12 5.99M12 2 1 21h22L12 2zm1 14h-2v2h2v-2zm0-6h-2v4h2v-4z"
+                        Foreground="#FFA800"
+                        Width="22"
+                        Height="22"
+                        Margin="0,7,12,7"
+                        VerticalAlignment="Top"
+                    />
+                    <TextBlock
+                        Text="{l:Locale linux_add_warning}"
+                        Foreground="#FFA800"
+                        TextWrapping="Wrap"
+                        VerticalAlignment="Center"
+                        Margin="0,9"
+                    />
+                </DockPanel>
+            </Border>
+            <ScrollViewer Grid.Row="1">
+                <v:LinuxSettingsPanel x:Name="Settings" ShowGameMode="False" />
+            </ScrollViewer>
+            <Button Grid.Row="2" Classes="glass" HorizontalAlignment="Right" Margin="0,12,0,0" Click="OnConfirm">
+                <TextBlock Classes="button" Text="{l:Locale linux_add_confirm, Upper=True}" />
+            </Button>
+        </Grid>
+    </c:GlassBorder>
+</UserControl>

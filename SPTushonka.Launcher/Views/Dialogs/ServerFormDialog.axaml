@@ -1,0 +1,37 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+    x:Class="SPTarkov.Launcher.Views.Dialogs.ServerFormDialog"
+>
+    <c:GlassBorder Classes="dialog" Padding="20">
+        <StackPanel Spacing="12">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <Border x:Name="HeaderIcon" Classes="dialogIcon">
+                    <c:MaterialIcon
+                        x:Name="HeaderGlyph"
+                        Data="{StaticResource IconDns}"
+                        Width="24"
+                        Height="24"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                    />
+                </Border>
+                <TextBlock x:Name="Title" Classes="h6" VerticalAlignment="Center" />
+            </StackPanel>
+            <TextBlock x:Name="Description" Classes="body1" TextWrapping="Wrap" />
+
+            <c:OutlinedField x:Name="NameField" />
+            <c:OutlinedField x:Name="AddressField" Margin="0,4,0,0" Placeholder="127.0.0.1:6969" />
+
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,12,0,0">
+                <Button x:Name="ConfirmButton" Classes="glass" IsEnabled="False" Click="OnConfirm">
+                    <TextBlock x:Name="ConfirmText" Classes="button" />
+                </Button>
+                <Button Classes="glass" Click="OnCancel">
+                    <TextBlock x:Name="CancelText" Classes="button" />
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </c:GlassBorder>
+</UserControl>

@@ -1,0 +1,33 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+    x:Class="SPTarkov.Launcher.Controls.OutlinedField"
+    x:DataType="c:OutlinedField"
+>
+    <!-- The frame starts 8px down so the label can overhang it. A negative margin on the label gets clipped -->
+    <StackPanel>
+        <Panel Height="48">
+            <c:OutlineBorder x:Name="Frame" Margin="0,8,0,0" NotchStart="12" NotchWidth="{Binding #FloatingLabel.Bounds.Width}" />
+            <TextBox
+                x:Name="Input"
+                Classes="outlined"
+                Margin="0,8,0,0"
+                Text="{Binding Text, RelativeSource={RelativeSource AncestorType=c:OutlinedField}, Mode=TwoWay}"
+                PlaceholderText="{Binding Placeholder, RelativeSource={RelativeSource AncestorType=c:OutlinedField}}"
+                InnerRightContent="{Binding Trailing, RelativeSource={RelativeSource AncestorType=c:OutlinedField}}"
+            />
+            <TextBlock
+                x:Name="FloatingLabel"
+                Padding="5,0"
+                Margin="13,2,0,0"
+                FontSize="12"
+                LineHeight="14"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Text="{Binding Label, RelativeSource={RelativeSource AncestorType=c:OutlinedField}}"
+            />
+        </Panel>
+        <TextBlock x:Name="Helper" Classes="caption helper" Margin="8,3,14,0" TextWrapping="Wrap" IsVisible="False" />
+    </StackPanel>
+</UserControl>

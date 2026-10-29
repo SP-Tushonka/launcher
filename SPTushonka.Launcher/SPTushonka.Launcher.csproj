@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Build.props" />
 
   <PropertyGroup>
@@ -10,63 +10,46 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://sp-mod.com</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SP-Tushonka/launcher</RepositoryUrl>
-    <LangVersion>latestmajor</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
     <OutputType>WinExe</OutputType>
-    <ApplicationIcon>wwwroot/images/spt-logo.ico</ApplicationIcon>
-    <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
-    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <AssemblyName>SPT.Launcher</AssemblyName>
-
-    <!-- Required by LibraryImport source generator in Helpers/NativeMethods.cs -->
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <ApplicationIcon>Assets/spt-logo.ico</ApplicationIcon>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
-    <AssemblyName>SPT.Launcher.Linux</AssemblyName>
-  </PropertyGroup>
-
-  <!-- Copies MudBlazor's static assets from the NuGet package: the stylesheet to wwwroot/css/ and the script to wwwroot/js/ -->
-  <!-- If once built, you find the launcher looks broken, its probably because these didnt exist first -->
-  <Target Name="CopyMudBlazor" BeforeTargets="PrepareForBuild">
-    <Copy SourceFiles="$(NuGetPackageRoot)mudblazor/9.8.0/staticwebassets/MudBlazor.min.css" DestinationFolder="$(ProjectDir)wwwroot/css" />
-    <Copy SourceFiles="$(NuGetPackageRoot)mudblazor/9.8.0/staticwebassets/MudBlazor.min.js" DestinationFolder="$(ProjectDir)wwwroot/js" />
-  </Target>
 
   <ItemGroup>
     <ProjectReference Include="../SPTushonka.Core/SPTushonka.Core.csproj" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.0" />
-    <EmbeddedResource Include="wwwroot/**" />
-    <SptData Include="$(ProjectDir)../SPTushonka.Core/SPT_Data/**/*.*" />
+    <PackageReference Include="Avalonia" Version="12.1.4" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.4" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.4" />
+    <PackageReference Include="Avalonia.Wayland" Version="12.1.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="Components\Settings\SettingLinuxLaunchComponent.razor" />
-    <AdditionalFiles Include="Components\Settings\SettingLinuxPrefixComponent.razor" />
-    <AdditionalFiles Include="Components\Settings\SettingLinuxProtonComponent.razor" />
-    <AdditionalFiles Include="Components\Settings\SettingLinuxUmuComponent.razor" />
-    <AdditionalFiles Include="Components\Settings\SettingLocaleComponent.razor" />
-    <AdditionalFiles Include="Components\Settings\SettingSwitchComponent.razor" />
+    <AvaloniaResource Include="Assets/bg.jpg" />
+    <AvaloniaResource Include="Assets/spt-logo.ico" />
+    <AvaloniaResource Include="Assets/side_*.png" />
+    <AvaloniaResource Include="Assets/Fonts/*.ttf" />
+    <SptData Include="$(ProjectDir)../SPTushonka.Core/SPT_Data/**/*.*" />
   </ItemGroup>
 
   <Target Name="CopySptData" AfterTargets="PostBuildEvent">
     <Copy SourceFiles="@(SptData);" DestinationFolder="$(ProjectDir)$(OutDir)SPT_Data/%(RecursiveDir)" />
   </Target>
-
+  
   <Target Name="SPTBuildEvent" AfterTargets="Publish">
     <RemoveDir Directories="$(ProjectDir)../Build" />
     <MakeDir Directories="$(ProjectDir)../Build" />
-    <!-- Windows -->
     <Copy
       Condition="'$(RuntimeIdentifier)' == 'win-x64'"
-      SourceFiles="$(ProjectDir)bin/Release/net10.0/win-x64/publish/SPT.Launcher.exe"
+      SourceFiles="$(PublishDir)SPT.Launcher.exe"
       DestinationFolder="$(ProjectDir)../Build"
     />
-    <!-- Linux -->
     <Copy
       Condition="'$(RuntimeIdentifier)' == 'linux-x64'"
-      SourceFiles="$(ProjectDir)bin/Release/net10.0/linux-x64/publish/SPT.Launcher.Linux"
-      DestinationFolder="$(ProjectDir)../Build"
+      SourceFiles="$(PublishDir)SPT.Launcher"
+      DestinationFiles="$(ProjectDir)../Build/SPT.Launcher.Linux"
     />
     <Copy SourceFiles="@(SptData)" DestinationFiles="@(SptData->'$(ProjectDir)../Build/SPT_Data/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>

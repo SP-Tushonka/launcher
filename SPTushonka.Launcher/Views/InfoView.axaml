@@ -1,0 +1,12 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+    xmlns:v="using:SPTarkov.Launcher.Views"
+    x:Class="SPTarkov.Launcher.Views.InfoView"
+>
+    <ScrollViewer VerticalScrollBarVisibility="Hidden">
+        <!-- Cards in a row stretch to match the tallest one -->
+        <Grid x:Name="Cards" Margin="16,12,16,8" ColumnDefinitions="*,*,*" ColumnSpacing="24" RowSpacing="24" />
+    </ScrollViewer>
+</UserControl>

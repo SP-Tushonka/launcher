@@ -1,0 +1,72 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+    xmlns:l="using:SPTarkov.Launcher.Markup"
+    x:Class="SPTarkov.Launcher.Views.ProfilesView"
+>
+    <ScrollViewer VerticalScrollBarVisibility="Hidden">
+        <StackPanel Margin="16,12,16,8" Spacing="16">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Classes="glass" Padding="12,6,16,6" Click="OnDisconnect">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <c:MaterialIcon
+                            Data="{StaticResource IconArrowBack}"
+                            Foreground="#F64E62"
+                            Width="20"
+                            Height="20"
+                            VerticalAlignment="Center"
+                        />
+                        <TextBlock Classes="button" Text="{l:Locale profiles_disconnect, Upper=True}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="glass" Padding="12,6,16,6" Click="OnCreate">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <c:MaterialIcon
+                            Data="{StaticResource IconPersonAdd}"
+                            Foreground="#0BBA83"
+                            Width="20"
+                            Height="20"
+                            VerticalAlignment="Center"
+                        />
+                        <TextBlock Classes="button" Text="{l:Locale profiles_create, Upper=True}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button x:Name="LoginButton" Classes="glass" Padding="12,6,16,6" Click="OnLogin">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <c:MaterialIcon
+                            Data="{StaticResource IconLogin}"
+                            Foreground="#0BBA83"
+                            Width="20"
+                            Height="20"
+                            VerticalAlignment="Center"
+                        />
+                        <TextBlock Classes="button" Text="{l:Locale profiles_login, Upper=True}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+            <UniformGrid x:Name="Cards" Columns="3" ColumnSpacing="24" RowSpacing="24" />
+
+            <c:GlassBorder x:Name="EmptyState" Classes="card">
+                <StackPanel Margin="0,48" Spacing="8" HorizontalAlignment="Center">
+                    <c:MaterialIcon
+                        x:Name="EmptyIcon"
+                        Foreground="{StaticResource TextSecondary}"
+                        Width="64"
+                        Height="64"
+                        HorizontalAlignment="Center"
+                    />
+                    <TextBlock x:Name="EmptyTitle" Classes="h6" TextAlignment="Center" HorizontalAlignment="Center" />
+                    <TextBlock
+                        x:Name="EmptySubtitle"
+                        Classes="body1"
+                        Foreground="{StaticResource TextSecondary}"
+                        TextAlignment="Center"
+                        HorizontalAlignment="Center"
+                    />
+                </StackPanel>
+            </c:GlassBorder>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

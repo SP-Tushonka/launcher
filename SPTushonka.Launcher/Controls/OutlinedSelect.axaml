@@ -1,0 +1,32 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+    x:Class="SPTarkov.Launcher.Controls.OutlinedSelect"
+    x:DataType="c:OutlinedSelect"
+>
+    <StackPanel>
+        <Panel Height="48">
+            <c:OutlineBorder x:Name="Frame" Margin="0,8,0,0" NotchStart="12" NotchWidth="{Binding #FloatingLabel.Bounds.Width}" />
+            <ComboBox
+                x:Name="Picker"
+                Classes="outlined"
+                Margin="0,8,0,0"
+                HorizontalAlignment="Stretch"
+                ItemsSource="{Binding ItemsSource, RelativeSource={RelativeSource AncestorType=c:OutlinedSelect}}"
+                SelectedItem="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=c:OutlinedSelect}, Mode=TwoWay}"
+            />
+            <TextBlock
+                x:Name="FloatingLabel"
+                Padding="5,0"
+                Margin="13,2,0,0"
+                FontSize="12"
+                LineHeight="14"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Text="{Binding Label, RelativeSource={RelativeSource AncestorType=c:OutlinedSelect}}"
+            />
+        </Panel>
+        <TextBlock x:Name="Helper" Classes="caption helper" Margin="8,3,14,0" TextWrapping="Wrap" IsVisible="False" />
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,207 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+    xmlns:l="using:SPTarkov.Launcher.Markup"
+    xmlns:v="using:SPTarkov.Launcher.Views"
+    x:Class="SPTarkov.Launcher.Views.SettingsView"
+>
+    <UserControl.Styles>
+        <Style Selector="c|GlassBorder.panel">
+            <Setter Property="Padding" Value="20" />
+            <Setter Property="Background" Value="{StaticResource GlassFill}" />
+            <Setter Property="BorderBrush" Value="{StaticResource Lines}" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="BoxShadow" Value="0 3 3 -2 #33000000, 0 3 4 0 #24000000, 0 1 8 0 #1F000000" />
+        </Style>
+        <Style Selector="c|GlassBorder.panel > StackPanel">
+            <Setter Property="Spacing" Value="8" />
+        </Style>
+        <Style Selector="TextBlock.panelTitle">
+            <Setter Property="Margin" Value="20,0,0,0" />
+        </Style>
+        <Style Selector="Border.divider">
+            <Setter Property="Height" Value="1" />
+            <Setter Property="Background" Value="{StaticResource Lines}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Panel>
+        <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Hidden">
+            <Grid
+                x:Name="Panels"
+                Margin="16,12,16,32"
+                ColumnDefinitions="*,*"
+                RowDefinitions="Auto,Auto,Auto"
+                ColumnSpacing="24"
+                RowSpacing="24"
+            >
+                <c:GlassBorder Classes="panel">
+                    <StackPanel>
+                        <TextBlock Classes="h6 panelTitle" Text="{l:Locale setting_section_window}" />
+                        <Border Classes="divider" />
+                        <ToggleButton x:Name="CloseToTray" Classes="setting" Content="{l:Locale setting_close}" Click="OnCloseToTray" />
+                        <ToggleButton
+                            x:Name="MinimizeOnLaunch"
+                            Classes="setting"
+                            Content="{l:Locale setting_minimize}"
+                            Click="OnMinimizeOnLaunch"
+                        />
+                        <ToggleButton
+                            x:Name="CloseOnGameStart"
+                            Classes="setting"
+                            Content="{l:Locale setting_close_on_game_start}"
+                            Click="OnCloseOnGameStart"
+                        />
+                        <ToggleButton
+                            x:Name="AlwaysOnTop"
+                            Classes="setting"
+                            Content="{l:Locale setting_always_top}"
+                            Click="OnAlwaysOnTop"
+                        />
+                    </StackPanel>
+                </c:GlassBorder>
+
+                <c:GlassBorder Grid.Column="1" Classes="panel">
+                    <StackPanel>
+                        <TextBlock Classes="h6 panelTitle" Text="{l:Locale setting_section_interface}" />
+                        <Border Classes="divider" />
+                        <ToggleButton
+                            x:Name="UseBackground"
+                            Classes="setting"
+                            Content="{l:Locale setting_option_background}"
+                            Click="OnUseBackground"
+                        />
+                        <DockPanel Height="48" Margin="20,0">
+                            <ComboBox
+                                x:Name="Language"
+                                Classes="select"
+                                DockPanel.Dock="Right"
+                                Width="196"
+                                VerticalAlignment="Center"
+                                SelectionChanged="OnLanguageChanged"
+                            >
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="v:LocaleOption">
+                                        <TextBlock Text="{Binding Name}" FontSize="16" LineHeight="19" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <TextBlock Classes="body1" Text="{l:Locale setting_option_language}" VerticalAlignment="Center" />
+                        </DockPanel>
+                    </StackPanel>
+                </c:GlassBorder>
+
+                <c:GlassBorder Grid.Row="1" Classes="panel">
+                    <StackPanel>
+                        <TextBlock Classes="h6 panelTitle" Text="{l:Locale setting_section_game}" />
+                        <Border Classes="divider" />
+                        <ToggleButton
+                            x:Name="AutoConnect"
+                            Classes="setting"
+                            Content="{l:Locale setting_auto_connect}"
+                            Click="OnAutoConnect"
+                        />
+                        <ToggleButton
+                            x:Name="ClearCache"
+                            Classes="setting"
+                            Content="{l:Locale setting_option_clear_cache}"
+                            Click="OnClearCache"
+                        />
+                        <StackPanel>
+                            <ToggleButton
+                                x:Name="EnableGamePath"
+                                Classes="setting"
+                                Content="{l:Locale setting_set_game_path}"
+                                Click="OnEnableGamePath"
+                            />
+                            <DockPanel x:Name="GamePathRow" Margin="20,8,0,8">
+                                <Button
+                                    x:Name="SaveGamePath"
+                                    Classes="icon"
+                                    DockPanel.Dock="Right"
+                                    Width="48"
+                                    Height="48"
+                                    Padding="12"
+                                    VerticalAlignment="Center"
+                                    Click="OnSaveGamePath"
+                                >
+                                    <c:MaterialIcon x:Name="SaveIcon" Data="{StaticResource IconSave}" Width="24" Height="24" />
+                                </Button>
+                                <c:OutlinedField x:Name="GamePath" Label="{l:Locale setting_game_path}" Margin="0,0,0,4">
+                                    <c:OutlinedField.Trailing>
+                                        <Button
+                                            Classes="icon"
+                                            Width="48"
+                                            Height="40"
+                                            Padding="12,8"
+                                            Margin="0,0,2,0"
+                                            Click="OnBrowseGamePath"
+                                        >
+                                            <c:MaterialIcon
+                                                Data="{StaticResource IconFolder}"
+                                                Foreground="#3299FF"
+                                                Width="24"
+                                                Height="24"
+                                            />
+                                        </Button>
+                                    </c:OutlinedField.Trailing>
+                                </c:OutlinedField>
+                            </DockPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </c:GlassBorder>
+
+                <c:GlassBorder x:Name="LinuxPanel" Grid.Row="2" Grid.ColumnSpan="2" Classes="panel" IsVisible="False">
+                    <StackPanel>
+                        <TextBlock Classes="h6 panelTitle" Text="{l:Locale setting_section_linux}" />
+                        <Border Classes="divider" />
+                        <ContentControl x:Name="LinuxSettingsHost" />
+                    </StackPanel>
+                </c:GlassBorder>
+
+                <c:GlassBorder x:Name="TroubleshootingPanel" Grid.Row="2" Grid.ColumnSpan="2" Classes="panel">
+                    <StackPanel>
+                        <TextBlock Classes="h6 panelTitle" Text="{l:Locale setting_section_troubleshooting}" />
+                        <Border Classes="divider" />
+                        <ToggleButton
+                            x:Name="DebugLogging"
+                            Classes="setting"
+                            Content="{l:Locale setting_debug_logging}"
+                            Click="OnDebugLogging"
+                        />
+                        <Border Classes="divider" />
+                        <WrapPanel ItemSpacing="8" LineSpacing="8">
+                            <!-- Turned off until loading live settings is reworked -->
+                            <Button Classes="glass" IsEnabled="False" Click="OnLoadLiveSettings">
+                                <TextBlock Classes="button" Text="{l:Locale setting_load_live, Upper=True}" />
+                            </Button>
+                            <Button Classes="glass" Click="OnClearGameSettings">
+                                <TextBlock Classes="button" Text="{l:Locale setting_clear_game, Upper=True}" />
+                            </Button>
+                            <Button Classes="glass" Click="OnCleanTempFiles">
+                                <TextBlock Classes="button" Text="{l:Locale setting_clean_temp, Upper=True}" />
+                            </Button>
+                            <Button x:Name="CopyLogs" Classes="glass" Click="OnCopyLogs">
+                                <TextBlock Classes="button" Text="{l:Locale setting_copy_logs, Upper=True}" />
+                            </Button>
+                        </WrapPanel>
+                    </StackPanel>
+                </c:GlassBorder>
+            </Grid>
+        </ScrollViewer>
+
+        <Button
+            x:Name="ScrollTop"
+            Classes="fab"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Margin="0,0,16,16"
+            IsVisible="False"
+            Click="OnScrollTop"
+        >
+            <c:MaterialIcon Data="{StaticResource IconScrollTop}" Width="24" Height="24" />
+        </Button>
+    </Panel>
+</UserControl>
