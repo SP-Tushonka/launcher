@@ -28,7 +28,6 @@ public class App : Application
             .AddSingleton<BundleHelper>()
             .AddSingleton<FilePatcher>()
             .AddSingleton<LinuxHelper>()
-            .AddSingleton<WindowsClipboard>()
             .AddSingleton<TroubleshootingHelper>()
             .AddSingleton<WindowTitle>()
             .AddSingleton<TrayHelper>()

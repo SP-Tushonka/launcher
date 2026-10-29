@@ -1,7 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using SPTarkov.Core.Configuration;
@@ -44,7 +46,6 @@ public partial class SettingsView : UserControl
         ClearCache.IsChecked = settings.ClearCacheOnLaunch;
         EnableGamePath.IsChecked = settings.EnableGamePath;
         DebugLogging.IsChecked = settings.DebugLogging;
-        CopyLogs.IsEnabled = OperatingSystem.IsWindows();
         // Grid spacing applies to empty rows too, so the Linux row only exists on Linux
         if (OperatingSystem.IsLinux())
         {
@@ -234,18 +235,26 @@ public partial class SettingsView : UserControl
         );
     }
 
-    private void OnCopyLogs(object? sender, RoutedEventArgs e)
+    private async void OnCopyLogs(object? sender, RoutedEventArgs e)
     {
-        if (!OperatingSystem.IsWindows())
+        if (TopLevel.GetTopLevel(this) is not { Clipboard: { } clipboard, StorageProvider: { } storage })
         {
             return;
         }
 
         var selected = App.Services.GetRequiredService<StateHelper>().SelectedProfile;
-        var files = _troubleshooting.CollectLogFiles(selected);
         try
         {
-            App.Services.GetRequiredService<WindowsClipboard>().CopyFiles(files.ToArray());
+            var files = new List<IStorageItem>();
+            foreach (var path in _troubleshooting.CollectLogFiles(selected))
+            {
+                if (await storage.TryGetFileFromPathAsync(path) is { } file)
+                {
+                    files.Add(file);
+                }
+            }
+
+            await clipboard.SetFilesAsync(files);
         }
         catch (Exception)
         {
