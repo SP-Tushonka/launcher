@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -44,7 +45,6 @@ public partial class ProfileCard : UserControl
         Edition.Text = profile.Edition;
         IdCaption.Text = $"{locale.Get("profile_card_id")}:";
         ProfileId.Text = profile.ProfileId;
-        CopyId.IsEnabled = OperatingSystem.IsWindows();
 
         Delete.IsVisible = !onProfilePage;
         Invalid.IsVisible = profile.InvalidOrUnloadableProfile;
@@ -89,22 +89,25 @@ public partial class ProfileCard : UserControl
         Selected?.Invoke(Profile);
     }
 
-    private void OnCopyId(object? sender, RoutedEventArgs e)
+    private async void OnCopyId(object? sender, RoutedEventArgs e)
     {
-        if (Profile is null || !OperatingSystem.IsWindows())
+        if (Profile is null || TopLevel.GetTopLevel(this)?.Clipboard is not { } clipboard)
         {
             return;
         }
 
         var locale = App.Services.GetRequiredService<LocaleHelper>();
-        if (App.Services.GetRequiredService<WindowsClipboard>().CopyText(Profile.ProfileId))
+        try
         {
-            ToastHost.Show(locale.Get("profile_copy_id_success"), ToastSeverity.Success);
+            await clipboard.SetTextAsync(Profile.ProfileId);
         }
-        else
+        catch (Exception)
         {
             ToastHost.Show(locale.Get("profile_copy_id_error"), ToastSeverity.Error);
+            return;
         }
+
+        ToastHost.Show(locale.Get("profile_copy_id_success"), ToastSeverity.Success);
     }
 
     private void OnDelete(object? sender, RoutedEventArgs e)
