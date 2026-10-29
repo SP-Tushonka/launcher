@@ -3,7 +3,7 @@ namespace SPTarkov.Core.Helpers;
 public static class FilePickerHelper
 {
     /// <summary>
-    /// Folder a picker should open at for the given path. Returns null if nothing usable exists, as Photino hands this
+    /// Folder a picker should open at for the given path. Returns null if nothing usable exists, as the path goes
     /// straight to the platform dialog.
     /// </summary>
     public static string? StartDirectory(string? currentPath)

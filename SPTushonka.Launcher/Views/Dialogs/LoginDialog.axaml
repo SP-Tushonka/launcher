@@ -1,0 +1,31 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+    xmlns:l="using:SPTarkov.Launcher.Markup"
+    x:Class="SPTarkov.Launcher.Views.Dialogs.LoginDialog"
+>
+    <!-- Username login for servers that list no profiles -->
+    <c:GlassBorder Classes="dialog" Padding="24,16">
+        <StackPanel Spacing="12">
+            <c:OutlinedField x:Name="Username" Label="{l:Locale profile_login_username}" />
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                <Button x:Name="LoginButton" Classes="glass" Padding="12,6,16,6" IsEnabled="False" Click="OnLogin">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <c:MaterialIcon
+                            Data="{StaticResource IconLogin}"
+                            Foreground="#0BBA83"
+                            Width="20"
+                            Height="20"
+                            VerticalAlignment="Center"
+                        />
+                        <TextBlock Classes="button" Text="{l:Locale profiles_login, Upper=True}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="glass" Click="OnCancel">
+                    <TextBlock Classes="button" Text="{l:Locale profile_login_cancel, Upper=True}" />
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </c:GlassBorder>
+</UserControl>

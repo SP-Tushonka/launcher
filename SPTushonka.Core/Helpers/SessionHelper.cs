@@ -38,9 +38,201 @@ public record ConnectResult
     }
 }
 
-public class SessionHelper(ILogger<SessionHelper> logger, HttpHelper httpHelper, StateHelper stateHelper)
+/// <summary>
+///     Outcome of a profile request. <see cref="Rejected"/> means the server said no and <see cref="Failed"/> means the request never completed.
+/// </summary>
+public enum ProfileRequestResult
+{
+    Success,
+    Rejected,
+    Failed,
+}
+
+/// <summary>
+///     Outcome of <see cref="SessionHelper.TryAutoConnectAsync"/>
+/// </summary>
+public enum AutoConnectResult
+{
+    Skipped,
+    Success,
+    ServerMissing,
+    ConnectFailed,
+    ProfileMissing,
+    LoginFailed,
+}
+
+public class SessionHelper(ILogger<SessionHelper> logger, HttpHelper httpHelper, StateHelper stateHelper, ConfigHelper configHelper)
 {
     private static readonly TimeSpan _requestTimeout = TimeSpan.FromSeconds(10);
+
+    /// <summary>
+    ///     Connect to the saved server and log into the saved profile when auto-connect is on. Runs once per launch.
+    /// </summary>
+    /// <remarks>
+    ///     A saved server or profile that no longer exists is forgotten. A profile that only failed to load is kept so the user can fix it.
+    /// </remarks>
+    /// <param name="progress">Receives each connection step</param>
+    /// <param name="cancellationToken">Cancels the attempt</param>
+    /// <returns>How the attempt ended</returns>
+    public async Task<AutoConnectResult> TryAutoConnectAsync(
+        IProgress<ConnectStep>? progress = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var config = configHelper.GetConfig();
+        if (stateHelper.AutoConnectAttempted || !config.AutoConnectLastProfile || config.PreferredProfile is null)
+        {
+            return AutoConnectResult.Skipped;
+        }
+
+        stateHelper.AutoConnectAttempted = true;
+        var preferred = config.PreferredProfile;
+
+        var server = configHelper.GetServers().FirstOrDefault(s => s.ServerId == preferred.ServerId);
+        if (server is null)
+        {
+            configHelper.ClearPreferredProfile();
+            return AutoConnectResult.ServerMissing;
+        }
+
+        if (!(await ConnectToServerAsync(server, progress, cancellationToken)).Success)
+        {
+            stateHelper.LogoutAndDispose();
+            return AutoConnectResult.ConnectFailed;
+        }
+
+        var profile = stateHelper.ProfileList.FirstOrDefault(p => p.ProfileId == preferred.ProfileId);
+        if (profile is null || profile.InvalidOrUnloadableProfile)
+        {
+            if (profile is null)
+            {
+                configHelper.ClearPreferredProfile();
+            }
+
+            stateHelper.LogoutAndDispose();
+            return AutoConnectResult.ProfileMissing;
+        }
+
+        if (!await LoginToProfileAsync(profile, cancellationToken))
+        {
+            stateHelper.LogoutAndDispose();
+            return AutoConnectResult.LoginFailed;
+        }
+
+        stateHelper.SetAllowServerPage(true);
+        return AutoConnectResult.Success;
+    }
+
+    /// <summary>
+    ///     Create a profile on the connected server and take the server's updated profile list
+    /// </summary>
+    /// <param name="edition">Edition to create the profile with</param>
+    /// <param name="username">Username of the new profile</param>
+    /// <param name="cancellationToken">Cancels the request</param>
+    /// <returns>How the request ended</returns>
+    public Task<ProfileRequestResult> CreateProfileAsync(string edition, string username, CancellationToken cancellationToken = default)
+    {
+        var request = new SPTRegisterRequest { Edition = edition, Username = username };
+        return ProfileRequestAsync<SPTRegisterResponse>(Urls.Register, request, r => (r.Response, r.Profiles), cancellationToken);
+    }
+
+    /// <summary>
+    ///     Remove a profile from the connected server and take the server's updated profile list
+    /// </summary>
+    /// <param name="username">Username of the profile to remove</param>
+    /// <param name="cancellationToken">Cancels the request</param>
+    /// <returns>How the request ended</returns>
+    public Task<ProfileRequestResult> RemoveProfileAsync(string username, CancellationToken cancellationToken = default)
+    {
+        var request = new SPTLoginRequest { Username = username };
+        return ProfileRequestAsync<SPTRemoveResponse>(Urls.Remove, request, r => (r.Response, r.Profiles), cancellationToken);
+    }
+
+    /// <summary>
+    ///     Flag a profile for a wipe, which the server applies on the next game launch
+    /// </summary>
+    /// <param name="profile">Profile to wipe</param>
+    /// <param name="cancellationToken">Cancels the request</param>
+    /// <returns>How the request ended</returns>
+    public Task<ProfileRequestResult> WipeProfileAsync(MiniProfile profile, CancellationToken cancellationToken = default)
+    {
+        var request = new SPTRegisterRequest { Edition = profile.Edition, Username = profile.Username };
+        return ProfileRequestAsync<SPTWipeResponse>(Urls.Wipe, request, r => (r.Response, r.Profiles), cancellationToken);
+    }
+
+    /// <summary>
+    ///     Re-read the selected profile after a game session. The single profile request is the fallback when the list request fails.
+    /// </summary>
+    /// <param name="cancellationToken">Cancels the requests</param>
+    /// <returns>True when the selected profile was refreshed</returns>
+    public async Task<bool> RefreshSelectedProfileAsync(CancellationToken cancellationToken = default)
+    {
+        if (stateHelper.SelectedProfile is not { } selected)
+        {
+            return false;
+        }
+
+        try
+        {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(_requestTimeout);
+
+            var profiles = await httpHelper.GameServerGet<SPTProfilesResponse>(Urls.Profiles, cts.Token);
+            if (profiles?.Response is { Count: > 0 } list)
+            {
+                stateHelper.ProfileList = list;
+                if (list.FirstOrDefault(p => p.ProfileId == selected.ProfileId) is { } updated)
+                {
+                    stateHelper.SelectedProfile = updated;
+                    return true;
+                }
+            }
+
+            var request = new SPTLoginRequest { Username = selected.Username };
+            var profile = await httpHelper.GameServerPut<SPTProfileResponse>(Urls.Profile, request, cts.Token);
+            if (profile?.Response is null)
+            {
+                return false;
+            }
+
+            stateHelper.SelectedProfile = profile.Response;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Refreshing profile {Username} failed", selected.Username);
+            return false;
+        }
+    }
+
+    private async Task<ProfileRequestResult> ProfileRequestAsync<TResponse>(
+        string url,
+        object request,
+        Func<TResponse, (bool Accepted, List<MiniProfile> Profiles)> read,
+        CancellationToken cancellationToken
+    )
+    {
+        try
+        {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(_requestTimeout);
+
+            var response = await httpHelper.GameServerPut<TResponse>(url, request, cts.Token);
+            if (response is null)
+            {
+                return ProfileRequestResult.Rejected;
+            }
+
+            var (accepted, profiles) = read(response);
+            stateHelper.ProfileList = profiles;
+            return accepted ? ProfileRequestResult.Success : ProfileRequestResult.Rejected;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Profile request to {Url} failed", url);
+            return ProfileRequestResult.Failed;
+        }
+    }
 
     /// <summary>
     /// Selects the server, then pings it and fetches its profile list, profile types, and mod pages, storing them on

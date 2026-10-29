@@ -1,0 +1,49 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+    xmlns:l="using:SPTarkov.Launcher.Markup"
+    x:Class="SPTarkov.Launcher.Views.Dialogs.CreateProfileDialog"
+>
+    <c:GlassBorder Classes="dialog" Padding="20">
+        <StackPanel Spacing="12">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <Border x:Name="HeaderIcon" Classes="dialogIcon">
+                    <c:MaterialIcon
+                        x:Name="HeaderGlyph"
+                        Data="{StaticResource IconPerson}"
+                        Width="24"
+                        Height="24"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                    />
+                </Border>
+                <TextBlock Classes="h6" Text="{l:Locale profile_add_title}" VerticalAlignment="Center" />
+            </StackPanel>
+            <TextBlock Classes="body1" Text="{l:Locale profile_add_text}" TextWrapping="Wrap" />
+
+            <c:OutlinedSelect x:Name="Edition" />
+            <Border
+                x:Name="EditionCard"
+                Background="#303038"
+                BorderBrush="{StaticResource Lines}"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="8"
+                IsVisible="False"
+            >
+                <TextBlock x:Name="EditionDescription" Classes="body1" TextWrapping="Wrap" />
+            </Border>
+            <c:OutlinedField x:Name="Username" Margin="0,4,0,0" HelperText="{l:Locale profile_add_name_help}" />
+
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,12,0,0">
+                <Button x:Name="ConfirmButton" Classes="glass" IsEnabled="False" Click="OnConfirm">
+                    <TextBlock Classes="button" Text="{l:Locale profile_add_confirm, Upper=True}" />
+                </Button>
+                <Button Classes="glass" Click="OnCancel">
+                    <TextBlock Classes="button" Text="{l:Locale profile_add_cancel, Upper=True}" />
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </c:GlassBorder>
+</UserControl>

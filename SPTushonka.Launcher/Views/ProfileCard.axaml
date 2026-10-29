@@ -1,0 +1,78 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+    xmlns:l="using:SPTarkov.Launcher.Markup"
+    x:Class="SPTarkov.Launcher.Views.ProfileCard"
+    ClipToBounds="False"
+>
+    <c:GlassBorder x:Name="Card" Classes="card" Tapped="OnTapped">
+        <Panel>
+            <!-- The faction artwork bleeds into the padding and is cut off at the card inner edge -->
+            <Canvas x:Name="Artwork" Margin="-16" ClipToBounds="True">
+                <Image
+                    x:Name="SideImage"
+                    Opacity="0.02"
+                    RenderTransformOrigin="50%,50%"
+                    RenderTransform="rotate(-25deg)"
+                    IsHitTestVisible="False"
+                />
+            </Canvas>
+
+            <!-- Dividers take the spare height when the card is stretched -->
+            <Grid RowDefinitions="Auto,Auto,*,Auto,*,Auto" RowSpacing="8">
+                <Grid Height="24" ColumnDefinitions="*,Auto">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <c:MaterialIcon x:Name="PersonIcon" Data="{StaticResource IconPerson}" Width="24" Height="24" />
+                        <StackPanel Classes="actions" Orientation="Horizontal" Spacing="4">
+                            <Button x:Name="CopyId" Classes="icon" ToolTip.Tip="{l:Locale profile_copy_id}" Click="OnCopyId">
+                                <c:MaterialIcon Data="{StaticResource IconFileCopy}" Width="20" Height="20" />
+                            </Button>
+                            <Button x:Name="Delete" Classes="icon delete" ToolTip.Tip="{l:Locale profile_card_delete}" Click="OnDelete">
+                                <c:MaterialIcon Data="{StaticResource IconDelete}" Width="20" Height="20" />
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <StackPanel
+                            x:Name="Invalid"
+                            Orientation="Horizontal"
+                            Spacing="6"
+                            IsVisible="False"
+                            ToolTip.Tip="{l:Locale profile_card_invalid}"
+                        >
+                            <Border Width="9" Height="9" CornerRadius="4.5" Background="#EF5350" VerticalAlignment="Center" />
+                            <TextBlock
+                                Classes="status"
+                                Text="{l:Locale profile_card_status_invalid, Upper=True}"
+                                Foreground="{StaticResource TextSecondary}"
+                            />
+                        </StackPanel>
+                        <TextBlock x:Name="Level" Classes="status" Foreground="{StaticResource TextSecondary}" />
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Grid.Row="1">
+                    <TextBlock x:Name="NameCaption" Classes="caption" />
+                    <TextBlock x:Name="Username" Classes="h6" Margin="0,-9,0,0" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <Border Grid.Row="2" Height="1" Background="{StaticResource Lines}" VerticalAlignment="Center" />
+                <StackPanel Grid.Row="3">
+                    <TextBlock x:Name="EditionCaption" Classes="caption" />
+                    <TextBlock x:Name="Edition" Classes="h6" Margin="0,-9,0,0" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <Border Grid.Row="4" Height="1" Background="{StaticResource Lines}" VerticalAlignment="Center" />
+                <StackPanel Grid.Row="5">
+                    <TextBlock x:Name="IdCaption" Classes="caption" />
+                    <TextBlock
+                        x:Name="ProfileId"
+                        Classes="body1 mono"
+                        LetterSpacing="0.32"
+                        Margin="0,-4,0,0"
+                        TextTrimming="CharacterEllipsis"
+                    />
+                </StackPanel>
+            </Grid>
+        </Panel>
+    </c:GlassBorder>
+</UserControl>

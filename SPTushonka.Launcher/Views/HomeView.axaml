@@ -1,0 +1,102 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+    xmlns:m="using:SPTarkov.Launcher.Models"
+    xmlns:l="using:SPTarkov.Launcher.Markup"
+    x:Class="SPTarkov.Launcher.Views.HomeView"
+>
+    <StackPanel Margin="16,12,16,8" Spacing="16">
+        <Button Classes="glass" HorizontalAlignment="Left" Padding="12,6,16,6" Click="OnAddServer">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <c:MaterialIcon
+                    Data="{StaticResource IconAddServer}"
+                    Foreground="#0BBA83"
+                    Width="20"
+                    Height="20"
+                    VerticalAlignment="Center"
+                />
+                <TextBlock Classes="button" Text="{l:Locale home_add_server, Upper=True}" VerticalAlignment="Center" />
+            </StackPanel>
+        </Button>
+
+        <Border x:Name="EmptyAlert" Background="#3299FF" CornerRadius="4" Padding="16,6" IsVisible="False">
+            <DockPanel>
+                <c:MaterialIcon
+                    DockPanel.Dock="Left"
+                    Data="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"
+                    Foreground="White"
+                    Width="22"
+                    Height="22"
+                    Margin="0,7,12,7"
+                />
+                <TextBlock
+                    Text="{l:Locale home_add_server_cta}"
+                    Foreground="White"
+                    TextWrapping="Wrap"
+                    VerticalAlignment="Center"
+                    Margin="0,9"
+                />
+            </DockPanel>
+        </Border>
+
+        <ItemsControl x:Name="Servers" ClipToBounds="False">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="3" ColumnSpacing="24" RowSpacing="24" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="m:ServerCardModel">
+                    <c:GlassBorder Classes="card interactive" Tapped="OnCardTapped">
+                        <StackPanel>
+                            <Grid Height="24" ColumnDefinitions="*,Auto">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <c:MaterialIcon
+                                        Data="{StaticResource IconDns}"
+                                        Foreground="{Binding IconBrush}"
+                                        Width="24"
+                                        Height="24"
+                                    />
+                                    <c:MaterialIcon
+                                        IsVisible="{Binding Locked}"
+                                        Data="{StaticResource IconLock}"
+                                        Foreground="#66FFFFFF"
+                                        ToolTip.Tip="{l:Locale server_card_protect}"
+                                        Width="20"
+                                        Height="20"
+                                        VerticalAlignment="Center"
+                                    />
+                                    <StackPanel Classes="actions" IsVisible="{Binding Editable}" Orientation="Horizontal" Spacing="4">
+                                        <Button Classes="icon" ToolTip.Tip="{l:Locale server_card_edit}" Click="OnEdit">
+                                            <c:MaterialIcon Data="{StaticResource IconBuild}" Width="20" Height="20" />
+                                        </Button>
+                                        <Button Classes="icon delete" ToolTip.Tip="{l:Locale server_card_delete}" Click="OnRemove">
+                                            <c:MaterialIcon Data="{StaticResource IconDelete}" Width="20" Height="20" />
+                                        </Button>
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <Border
+                                        Width="9"
+                                        Height="9"
+                                        CornerRadius="4.5"
+                                        Background="{Binding DotBrush}"
+                                        BoxShadow="{Binding DotGlow}"
+                                        VerticalAlignment="Center"
+                                    />
+                                    <TextBlock Classes="status" Text="{Binding StatusText}" Foreground="{Binding StatusBrush}" />
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Classes="caption" Text="{l:Locale server_card_name}" Margin="0,8,0,0" />
+                            <TextBlock Classes="h6" Text="{Binding Name}" Margin="0,-9,0,0" />
+                            <Border Height="1" Background="{StaticResource Lines}" Margin="0,8,0,0" />
+                            <TextBlock Classes="caption" Text="{l:Locale server_card_address}" Margin="0,8,0,0" />
+                            <TextBlock Classes="h6 mono" Text="{Binding Address}" Margin="0,-8,0,0" />
+                        </StackPanel>
+                    </c:GlassBorder>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>

@@ -2,7 +2,6 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using MudBlazor;
 using SPTarkov.Core.Logging;
 using SPTarkov.Core.SPT;
 
@@ -18,17 +17,6 @@ public class ConfigHelper
 
     private readonly Lock _lock = new();
     private readonly ILogger<ConfigHelper> _logger;
-
-    public readonly DialogOptions DialogOptions = new()
-    {
-        Position = DialogPosition.Center,
-        MaxWidth = MaxWidth.ExtraSmall,
-        BackdropClick = true,
-        CloseOnEscapeKey = true,
-        NoHeader = true,
-        FullWidth = true,
-        BackgroundClass = "dialog-backdrop-class",
-    };
 
     private LauncherSettings? _settings;
 

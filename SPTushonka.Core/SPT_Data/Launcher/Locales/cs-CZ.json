@@ -50,5 +50,9 @@
   "auto_connect_connecting": "Automatické připojování...",
   "auto_connect_failed": "Nelze se automaticky připojit k poslednímu serveru.",
   "auto_connect_server_missing": "Váš uložený server již není nakonfigurován.",
-  "game_helper_error_1": "SPT je nainstalováno v oficiální složce hry"
+  "game_helper_error_1": "SPT je nainstalováno v oficiální složce hry",
+  "info_card_name": "Název",
+  "profile_card_name": "Název",
+  "setting_option_language": "Jazyk",
+  "profile_add_confirm": "Přidat"
 }

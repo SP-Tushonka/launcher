@@ -1,0 +1,81 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+    xmlns:l="using:SPTarkov.Launcher.Markup"
+    x:Class="SPTarkov.Launcher.Views.LinuxSettingsPanel"
+>
+    <!-- Linux settings rows. The startup dialog shows them without GameMode -->
+    <UserControl.Styles>
+        <Style Selector="DockPanel.pathRow">
+            <Setter Property="Margin" Value="20,8,0,8" />
+        </Style>
+        <Style Selector="DockPanel.pathRow > Button.icon">
+            <Setter Property="Width" Value="48" />
+            <Setter Property="Height" Value="48" />
+            <Setter Property="Padding" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.folder">
+            <Setter Property="Width" Value="48" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Margin" Value="0,0,2,0" />
+        </Style>
+    </UserControl.Styles>
+
+    <StackPanel>
+        <DockPanel Classes="pathRow">
+            <Button x:Name="SavePrefix" Classes="icon" DockPanel.Dock="Right" Click="OnSavePrefix">
+                <c:MaterialIcon Data="{StaticResource IconSave}" Width="24" Height="24" />
+            </Button>
+            <c:OutlinedField
+                x:Name="Prefix"
+                Label="{l:Locale linux_wine_prefix}"
+                ErrorText="{l:Locale setting_help_prefix}"
+                Margin="0,0,0,4"
+            >
+                <c:OutlinedField.Trailing>
+                    <Button Classes="icon folder" Click="OnBrowsePrefix">
+                        <c:MaterialIcon Data="{StaticResource IconFolder}" Foreground="#3299FF" Width="24" Height="24" />
+                    </Button>
+                </c:OutlinedField.Trailing>
+            </c:OutlinedField>
+        </DockPanel>
+
+        <DockPanel Classes="pathRow">
+            <Button x:Name="SaveUmu" Classes="icon" DockPanel.Dock="Right" Click="OnSaveUmu">
+                <c:MaterialIcon Data="{StaticResource IconSave}" Width="24" Height="24" />
+            </Button>
+            <c:OutlinedField x:Name="Umu" Label="{l:Locale linux_add_umu}" ErrorText="{l:Locale setting_help_umu}" Margin="0,0,0,4">
+                <c:OutlinedField.Trailing>
+                    <Button Classes="icon folder" Click="OnBrowseUmu">
+                        <c:MaterialIcon Data="{StaticResource IconFolder}" Foreground="#3299FF" Width="24" Height="24" />
+                    </Button>
+                </c:OutlinedField.Trailing>
+            </c:OutlinedField>
+        </DockPanel>
+
+        <DockPanel Classes="pathRow">
+            <Button x:Name="SaveLaunch" Classes="icon" DockPanel.Dock="Right" Click="OnSaveLaunch">
+                <c:MaterialIcon Data="{StaticResource IconSave}" Width="24" Height="24" />
+            </Button>
+            <c:OutlinedField x:Name="Launch" Label="{l:Locale linux_launch_settings}" Placeholder="MANGOHUD=1" Margin="0,0,0,4" />
+        </DockPanel>
+
+        <c:OutlinedSelect
+            x:Name="Proton"
+            Label="{l:Locale linux_proton_version}"
+            ErrorText="{l:Locale setting_help_proton}"
+            Margin="20,8,20,8"
+        />
+        <Button Classes="text" HorizontalAlignment="Center" Margin="0,8" Click="OnAddProtonPath">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <c:MaterialIcon Data="{StaticResource IconAdd}" Foreground="#776BE7" Width="18" Height="18" VerticalAlignment="Center" />
+                <TextBlock Classes="button" FontSize="13" Text="{l:Locale linux_add_proton_path, Upper=True}" VerticalAlignment="Center" />
+            </StackPanel>
+        </Button>
+
+        <ToggleButton x:Name="GameMode" Classes="setting" Content="GameMode" Click="OnGameMode" />
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,60 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+    xmlns:l="using:SPTarkov.Launcher.Markup"
+    x:Class="SPTarkov.Launcher.Views.ModPagesPanel"
+    Width="340"
+    HorizontalAlignment="Left"
+    IsHitTestVisible="False"
+    Opacity="0"
+    RenderTransform="translate(-12px, 0px)"
+>
+    <UserControl.Transitions>
+        <Transitions>
+            <DoubleTransition Property="Opacity" Duration="0:0:0.15" />
+            <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15" />
+        </Transitions>
+    </UserControl.Transitions>
+    <UserControl.Styles>
+        <Style Selector="Border.entry">
+            <Setter Property="Padding" Value="8,10" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Border.entry:pointerover">
+            <Setter Property="Background" Value="#0FFFFFFF" />
+        </Style>
+    </UserControl.Styles>
+
+    <Border Background="#27272F" BorderBrush="{StaticResource Lines}" BorderThickness="0,0,2,0" BoxShadow="{StaticResource Elevation5}">
+        <DockPanel>
+            <DockPanel DockPanel.Dock="Top" Margin="16,12,12,12">
+                <Button Classes="icon" DockPanel.Dock="Right" Padding="3" VerticalAlignment="Top" Click="OnClose">
+                    <c:MaterialIcon
+                        Data="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+                        Foreground="#ADADB1"
+                        Width="20"
+                        Height="20"
+                    />
+                </Button>
+                <StackPanel Margin="0,0,8,0">
+                    <TextBlock Classes="h6" Text="{l:Locale mod_pages_title}" />
+                    <TextBlock
+                        Text="{l:Locale mod_pages_subtitle}"
+                        Margin="0,2,0,0"
+                        FontSize="12.8"
+                        LineHeight="18.3"
+                        Foreground="#99FFFFFF"
+                        TextWrapping="Wrap"
+                    />
+                </StackPanel>
+            </DockPanel>
+            <Border DockPanel.Dock="Top" Height="1" Background="{StaticResource Lines}" />
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="Entries" Margin="8" />
+            </ScrollViewer>
+        </DockPanel>
+    </Border>
+</UserControl>

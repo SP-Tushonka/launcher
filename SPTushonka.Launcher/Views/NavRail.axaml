@@ -1,0 +1,137 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:SPTarkov.Launcher.Controls"
+    xmlns:l="using:SPTarkov.Launcher.Markup"
+    x:Class="SPTarkov.Launcher.Views.NavRail"
+    Width="56"
+>
+    <UserControl.Styles>
+        <Style Selector="Button.rail">
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="#80FFFFFF" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="ToolTip.Placement" Value="Right" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter Content="{TemplateBinding Content}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="Button.rail:pointerover">
+            <Setter Property="Background" Value="#0FFFFFFF" />
+        </Style>
+        <Style Selector="Button.rail:disabled">
+            <Setter Property="Foreground" Value="{StaticResource TextDisabled}" />
+        </Style>
+        <Style Selector="Button.tile">
+            <Setter Property="Padding" Value="5,3" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="ToolTip.Placement" Value="Right" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter Content="{TemplateBinding Content}" HorizontalAlignment="Center" />
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="Border.tile">
+            <Setter Property="Width" Value="40" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="CornerRadius" Value="4" />
+        </Style>
+        <Style Selector="Button.rail c|MaterialIcon">
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="30" />
+        </Style>
+        <Style Selector="StackPanel.tooltip TextBlock">
+            <Setter Property="LineHeight" Value="NaN" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+    </UserControl.Styles>
+
+    <c:GlassBorder
+        Background="{StaticResource GlassFill}"
+        BorderBrush="{StaticResource Lines}"
+        BorderThickness="0,0,2,0"
+        BoxShadow="{StaticResource Elevation5}"
+    >
+        <DockPanel>
+            <StackPanel DockPanel.Dock="Top" Margin="0,10,0,0">
+                <Button
+                    x:Name="ServersButton"
+                    Classes="rail"
+                    ToolTip.Tip="{l:Locale home}"
+                    Click="OnServers"
+                    PointerEntered="OnLeaveModPages"
+                >
+                    <c:MaterialIcon Data="{StaticResource IconServers}" />
+                </Button>
+            </StackPanel>
+            <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,10" Spacing="1">
+                <Button
+                    x:Name="SettingsButton"
+                    Classes="rail"
+                    ToolTip.Tip="{l:Locale settings}"
+                    Click="OnSettings"
+                    PointerEntered="OnLeaveModPages"
+                >
+                    <c:MaterialIcon Data="{StaticResource IconSettings}" />
+                </Button>
+                <Button x:Name="InfoButton" Classes="rail" ToolTip.Tip="{l:Locale info}" Click="OnInfo" PointerEntered="OnLeaveModPages">
+                    <c:MaterialIcon Data="{StaticResource IconInfo}" />
+                </Button>
+            </StackPanel>
+            <StackPanel x:Name="ServerTiles" Margin="0,4,0,0" IsVisible="False">
+                <Button Classes="tile" Click="OnSic" PointerEntered="OnLeaveModPages">
+                    <ToolTip.Tip>
+                        <StackPanel Classes="tooltip" MaxWidth="260">
+                            <TextBlock Text="{l:Locale tray_sic_homepage}" FontSize="14.4" FontWeight="SemiBold" Foreground="White" />
+                            <TextBlock x:Name="SicUrl" Margin="0,2,0,0" FontSize="12" Foreground="#99FFFFFF" />
+                            <TextBlock Text="{l:Locale sic_description}" Margin="0,6,0,0" FontSize="12.8" Foreground="#D9FFFFFF" />
+                        </StackPanel>
+                    </ToolTip.Tip>
+                    <Border Classes="tile">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                                <GradientStop Offset="0" Color="#513723" />
+                                <GradientStop Offset="1" Color="#312408" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <TextBlock
+                            Text="SIC"
+                            Foreground="#D8C199"
+                            FontSize="13.6"
+                            FontWeight="Bold"
+                            LetterSpacing="0.41"
+                            LineHeight="NaN"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                        />
+                    </Border>
+                </Button>
+                <StackPanel x:Name="ModPagesTile">
+                    <Border Width="32" Height="1" Margin="0,6" Background="#1FFFFFFF" />
+                    <Button Classes="tile" PointerEntered="OnEnterModPages" PointerExited="OnExitModPages">
+                        <Border Classes="tile" Background="#1AFFFFFF">
+                            <c:MaterialIcon
+                                Data="{StaticResource IconExtension}"
+                                Foreground="#CCFFFFFF"
+                                Width="20"
+                                Height="20"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                            />
+                        </Border>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+    </c:GlassBorder>
+</UserControl>

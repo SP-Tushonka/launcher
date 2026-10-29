@@ -396,18 +396,41 @@ public class GameHelper
 
     public async Task<bool> MonitorGame()
     {
-        string processName = GameProcessName;
-
         // Proton can take some time to launch the game, so we'll delay a bit
         await Task.Delay(12000);
-        var process = Process.GetProcessesByName(processName).FirstOrDefault();
+        using var process = Process.GetProcessesByName(GameProcessName).FirstOrDefault();
 
-        if (process != null)
+        if (process == null)
         {
-            while (!process.HasExited)
-            {
-                await Task.Delay(3000);
-            }
+            _logger.LogWarning("Game process was not running 12 seconds after launch");
+            return false;
+        }
+
+        DateTime? startTime = null;
+        try
+        {
+            // Holding a handle keeps the exit code readable once the process is gone.
+            _ = process.SafeHandle;
+            startTime = process.StartTime;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("Could not open game process: {Message}", ex.Message);
+        }
+
+        while (!process.HasExited)
+        {
+            await Task.Delay(3000);
+        }
+
+        var uptime = startTime is null ? "unknown" : (DateTime.Now - startTime.Value).ToString(@"hh\:mm\:ss");
+        try
+        {
+            _logger.LogInformation("Game exited with code 0x{ExitCode:X8} after {Uptime}", process.ExitCode, uptime);
+        }
+        catch (InvalidOperationException)
+        {
+            _logger.LogInformation("Game exited with unknown code after {Uptime}", uptime);
         }
 
         return false;
