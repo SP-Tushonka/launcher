@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
@@ -34,7 +35,7 @@ public partial class ProfilesView : UserControl
         }
 
         var connected = state.SelectedServer is not null;
-        EmptyIcon.Data = (Geometry)this.FindResource(connected ? "IconPersonSearch" : "IconLinkOff")!;
+        EmptyIcon.Data = (Geometry)Application.Current!.FindResource(connected ? "IconPersonSearch" : "IconLinkOff")!;
         EmptyTitle.Text = locale.Get(connected ? "profiles_empty_title" : "profiles_connect_warning");
         EmptySubtitle.Text = connected ? locale.Get("profiles_empty_subtitle") : null;
         EmptySubtitle.IsVisible = connected;
