@@ -232,7 +232,7 @@ public partial class ProfileView : UserControl
         var config = _config.GetConfig();
         if (config.AutoConnectLastProfile && _state.SelectedServer is { } server && _state.SelectedProfile is { } profile)
         {
-            _config.SetPreferredProfile(server.ServerId, profile.ProfileId);
+            _config.SetPreferredProfile(server.ServerId, profile.ProfileId, profile.Username);
         }
 
         if (config.CloseOnGameStart)

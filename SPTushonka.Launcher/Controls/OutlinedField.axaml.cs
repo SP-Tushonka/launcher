@@ -35,6 +35,15 @@ public partial class OutlinedField : UserControl
         InitializeComponent();
     }
 
+    /// <summary>
+    ///     Move keyboard focus into the text box with the caret after any text
+    /// </summary>
+    public void FocusInput()
+    {
+        Input.Focus();
+        Input.CaretIndex = Input.Text?.Length ?? 0;
+    }
+
     public string? Label
     {
         get => GetValue(LabelProperty);

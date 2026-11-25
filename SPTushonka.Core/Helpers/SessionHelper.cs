@@ -102,6 +102,17 @@ public class SessionHelper(ILogger<SessionHelper> logger, HttpHelper httpHelper,
         }
 
         var profile = stateHelper.ProfileList.FirstOrDefault(p => p.ProfileId == preferred.ProfileId);
+
+        // Servers that hide their profile list can still be logged into by username
+        if (profile is null && !string.IsNullOrEmpty(preferred.Username))
+        {
+            if (await LoginWithDetailsAsync(preferred.Username, cancellationToken) is not null)
+            {
+                stateHelper.SetAllowServerPage(true);
+                return AutoConnectResult.Success;
+            }
+        }
+
         if (profile is null || profile.InvalidOrUnloadableProfile)
         {
             if (profile is null)

@@ -33,6 +33,11 @@ public record LauncherSettings
     /// <summary>The last server/profile the user launched with.</summary>
     public PreferredProfile? PreferredProfile { get; set; }
 
+    /// <summary>
+    ///     Last username logged in with by name, keyed by server id
+    /// </summary>
+    public Dictionary<string, string> LastUsernames { get; set; } = new();
+
     public List<string> ExcludeFromCleanup { get; set; } = new();
 
     public string Language { get; set; } = "en";
