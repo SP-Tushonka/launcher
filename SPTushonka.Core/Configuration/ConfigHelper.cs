@@ -346,12 +346,35 @@ public class ConfigHelper
         }
     }
 
-    public void SetPreferredProfile(string serverId, string profileId)
+    public void SetPreferredProfile(string serverId, string profileId, string username)
     {
         lock (_lock)
         {
             _logger.LogDebug("SetPreferredProfile: server {ServerId} profile {ProfileId}", serverId, profileId);
-            _settings!.PreferredProfile = new PreferredProfile { ServerId = serverId, ProfileId = profileId };
+            _settings!.PreferredProfile = new PreferredProfile
+            {
+                ServerId = serverId,
+                ProfileId = profileId,
+                Username = username,
+            };
+            SaveConfig();
+        }
+    }
+
+    public string GetLastUsername(string serverId)
+    {
+        lock (_lock)
+        {
+            return _settings!.LastUsernames.GetValueOrDefault(serverId, "");
+        }
+    }
+
+    public void SetLastUsername(string serverId, string username)
+    {
+        lock (_lock)
+        {
+            _logger.LogDebug("SetLastUsername: server {ServerId}", serverId);
+            _settings!.LastUsernames[serverId] = username;
             SaveConfig();
         }
     }

@@ -5,4 +5,6 @@ public record PreferredProfile
     public string ServerId { get; set; } = "";
 
     public string ProfileId { get; set; } = "";
+
+    public string Username { get; set; } = "";
 }

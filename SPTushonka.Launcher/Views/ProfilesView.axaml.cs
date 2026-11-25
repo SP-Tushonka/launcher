@@ -1,10 +1,13 @@
-using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Microsoft.Extensions.DependencyInjection;
+using SPTarkov.Core.Configuration;
 using SPTarkov.Core.Helpers;
 using SPTarkov.Core.SPT;
+using SPTarkov.Launcher.Controls;
+using SPTarkov.Launcher.Helpers;
 
 namespace SPTarkov.Launcher.Views;
 
@@ -15,7 +18,6 @@ public partial class ProfilesView : UserControl
         InitializeComponent();
 
         var state = App.Services.GetRequiredService<StateHelper>();
-        var locale = App.Services.GetRequiredService<LocaleHelper>();
 
         foreach (var profile in state.ProfileList)
         {
@@ -27,24 +29,47 @@ public partial class ProfilesView : UserControl
         }
 
         var empty = state.ProfileList.Count == 0;
-        LoginButton.IsVisible = empty;
-        EmptyState.IsVisible = empty;
-        if (!empty)
+        var connected = state.SelectedServer is not null;
+        EmptyState.IsVisible = empty && !connected;
+        LoginCard.IsVisible = empty && connected;
+        if (!LoginCard.IsVisible)
         {
             return;
         }
 
-        var connected = state.SelectedServer is not null;
-        EmptyIcon.Data = (Geometry)Application.Current!.FindResource(connected ? "IconPersonSearch" : "IconLinkOff")!;
-        EmptyTitle.Text = locale.Get(connected ? "profiles_empty_title" : "profiles_connect_warning");
-        EmptySubtitle.Text = connected ? locale.Get("profiles_empty_subtitle") : null;
-        EmptySubtitle.IsVisible = connected;
+        Username.Text = App.Services.GetRequiredService<ConfigHelper>().GetLastUsername(state.SelectedServer!.ServerId);
+        UpdateLogin();
+        Username.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == OutlinedField.TextProperty)
+            {
+                UpdateLogin();
+            }
+        };
+        Username.KeyDown += (s, e) =>
+        {
+            if (e.Key == Key.Enter && LoginButton.IsEnabled)
+            {
+                OnLogin(s, e);
+            }
+        };
+        Loaded += (_, _) => Username.FocusInput();
+    }
+
+    // The avatar takes the colour the profile card will give this username
+    private void UpdateLogin()
+    {
+        LoginButton.IsEnabled = !string.IsNullOrWhiteSpace(Username.Text);
+        var color = Color.Parse(ModPageVisual.GetColor(Username.Text ?? ""));
+        AvatarGlyph.Foreground = new SolidColorBrush(color);
+        Avatar.Background = new SolidColorBrush(color, 0.12);
+        Avatar.BorderBrush = new SolidColorBrush(color, 0.4);
     }
 
     public event Action<MiniProfile>? ProfileSelected;
     public event Action<MiniProfile>? RemoveRequested;
     public event Action? CreateRequested;
-    public event Action? LoginRequested;
+    public event Action<string>? LoginRequested;
     public event Action? DisconnectRequested;
 
     private void OnDisconnect(object? sender, RoutedEventArgs e)
@@ -59,6 +84,6 @@ public partial class ProfilesView : UserControl
 
     private void OnLogin(object? sender, RoutedEventArgs e)
     {
-        LoginRequested?.Invoke();
+        LoginRequested?.Invoke(Username.Text!.Trim());
     }
 }

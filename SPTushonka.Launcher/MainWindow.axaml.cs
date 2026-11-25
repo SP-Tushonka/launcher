@@ -200,7 +200,7 @@ public partial class MainWindow : Window
         var profiles = new ProfilesView();
         profiles.DisconnectRequested += Disconnect;
         profiles.CreateRequested += () => _ = CreateProfileAsync();
-        profiles.LoginRequested += () => _ = LoginWithUsernameAsync();
+        profiles.LoginRequested += username => _ = LoginWithUsernameAsync(username);
         profiles.RemoveRequested += profile => _ = RemoveProfileAsync(profile);
         profiles.ProfileSelected += profile => _ = LoginAsync(profile);
         Show(profiles, LauncherPage.Profiles);
@@ -447,14 +447,8 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task LoginWithUsernameAsync()
+    private async Task LoginWithUsernameAsync(string username)
     {
-        var form = new LoginDialog();
-        if (await ShowDialogAsync(form, form.Result) is not { } username)
-        {
-            return;
-        }
-
         var progress = new ProgressDialog { Step = _locale.Get("profile_login_task_1") };
         ShowDialog(progress);
         await Task.Delay(DialogFlashGuard);
@@ -465,6 +459,18 @@ public partial class MainWindow : Window
         {
             ToastHost.Show(_locale.Get("profile_login_task_fail"), ToastSeverity.Error);
             return;
+        }
+
+        var server = _state.SelectedServer;
+        if (server is not null)
+        {
+            _config.SetLastUsername(server.ServerId, username);
+
+            // Servers without a profile list have no other way to pick the profile auto-connect signs into
+            if (_config.GetConfig().AutoConnectLastProfile)
+            {
+                _config.SetPreferredProfile(server.ServerId, profile.ProfileId, profile.Username);
+            }
         }
 
         ToastHost.Show($"{_locale.Get("profile_login_task_success")} {profile.Username}!", ToastSeverity.Success);
